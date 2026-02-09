@@ -962,3 +962,97 @@ def archive_post(request, post_id):
     except Exception as e:
         logger.error(f"Erro ao arquivar post: {str(e)}", exc_info=True)
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    
+
+def chama_espiral_page(request):
+    """View para a página do jogo Chama Espiral"""
+    return render(request, 'gamepage/chama_espiral.html')
+
+def lilith_view(request):
+    """
+    View responsável por renderizar a página do jogo Lilith: Search Truth.
+    """
+    return render(request, 'gamepage/lilith.html')
+
+def lore_portal(request, fragment_id=1):
+    # Simulação de Banco de Dados dos Fragmentos
+    # AGORA TODOS ESTÃO COMO 'unlocked'
+    fragments_db = [
+        {
+            'id': 1,
+            'title': "A Origem da Chama",
+            'type': "Templo Ancestral",
+            'status': 'unlocked',
+            'content': "Há milênios, quando as estrelas ainda dançavam em harmonia com a terra, nasceu a Chama Espiral. Não era apenas fogo, mas a própria essência do conhecimento cósmico, capturada em uma dança eterna de luz e energia. Os Antigos, sábios que dominavam as artes arcanas, descobriram que esta chama não queimava - ela revelava.",
+            'reflection': "Este fragmento revela camadas profundas da história da Chama Espiral. Continue explorando para descobrir como todos os fragmentos se conectam.",
+            'pos_top': 45, 'pos_left': 20,
+            'is_active': False
+        },
+        {
+            'id': 2,
+            'title': "Os Guardiões Perdidos",
+            'type': "Ruínas",
+            'status': 'unlocked',
+            'content': "Os primeiros a tocar a chama não foram queimados, mas transformados. Eles se tornaram os Guardiões, seres de pura energia cinética que juraram proteger o núcleo do templo. Com o tempo, sua humanidade se dissipou, restando apenas o dever eterno.",
+            'reflection': "Os Guardiões deixaram para trás mecanismos que só respondem à frequência correta da chama, sugerindo que a tecnologia e a magia eram uma só.",
+            'pos_top': 30, 'pos_left': 50,
+            'is_active': False
+        },
+        {
+            'id': 3,
+            'title': "O Grande Eclipse",
+            'type': "Evento Histórico",
+            'status': 'unlocked', # Desbloqueado
+            'content': "Durante o Grande Eclipse, a Chama Espiral oscilou pela primeira vez. Os registros indicam que uma sombra externa tentou drenar sua energia, fragmentando a realidade em múltiplos planos temporais. Foi neste momento que as ruínas se tornaram um labirinto.",
+            'reflection': "O eclipse não foi um evento natural, mas uma consequência da tentativa de controlar a chama sem o devido respeito.",
+            'pos_top': 55, 'pos_left': 70,
+            'is_active': False
+        },
+        {
+            'id': 4,
+            'title': "Fragmentos do Tempo",
+            'type': "Teoria",
+            'status': 'unlocked', # Desbloqueado
+            'content': "A realidade neste local não é linear. O passado, presente e futuro coexistem em camadas sobrepostas. A Chama Espiral atua como uma âncora, impedindo que essas camadas colapsem umas sobre as outras.",
+            'reflection': "Manipular a chama permite viajar brevemente entre essas camadas, resolvendo problemas do presente com soluções do passado.",
+            'pos_top': 70, 'pos_left': 40,
+            'is_active': False
+        },
+        {
+            'id': 5,
+            'title': "O Fim do Ciclo",
+            'type': "Profecia",
+            'status': 'unlocked', # Desbloqueado
+            'content': "A profecia final diz que um viajante virá não para dominar a chama, mas para libertá-la. Ao fazer isso, o ciclo de guarda eterna terminará, e o conhecimento contido na espiral retornará às estrelas.",
+            'reflection': "Você sente que seus passos no templo já foram previstos há muito tempo. O fim da jornada está próximo.",
+            'pos_top': 85, 'pos_left': 60,
+            'is_active': False
+        },
+    ]
+
+    # Lógica de Seleção (Mantém a mesma lógica robusta)
+    selected_fragment = next((f for f in fragments_db if f['id'] == fragment_id), fragments_db[0])
+    
+    # Marcar ativo para o template pintar de azul brilhante
+    for f in fragments_db:
+        if f['id'] == selected_fragment['id']:
+            f['is_active'] = True
+
+    # Cálculos de Progresso (Agora será 100% ou 5/5)
+    total = len(fragments_db)
+    unlocked = len([f for f in fragments_db if f['status'] == 'unlocked'])
+    progress_percentage = (unlocked / total) * 100
+
+    context = {
+        'fragments': fragments_db,
+        'selected': selected_fragment,
+        'total': total,
+        'unlocked_count': unlocked,
+        'progress_percent': progress_percentage,
+        # Lógica circular para o botão "Próximo": se for o último (5), volta para o 1
+        'next_id': fragment_id + 1 if fragment_id < total else 1
+    }
+
+    return render(request, 'gamepage/chama_espiralLore.html', context)
+
+

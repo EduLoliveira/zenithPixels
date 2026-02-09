@@ -205,13 +205,12 @@
                                 <div class="flex flex-col xs:flex-row xs:items-center gap-1 xs:gap-2">
                                     <span class="text-sm text-gray-500">{{ comment.created_at|date:"d/m/Y H:i" }}</span>
                                     {% if user.is_staff or user == comment.user %}
-                                    <!-- Botão para excluir comentário -->
-                                    <form action="{% url 'delete_comment' comment.id %}" method="POST" class="inline" onsubmit="return confirm('Tem certeza que deseja excluir este comentário?');">
-                                        {% csrf_token %}
-                                        <button type="submit" class="text-xs text-red-500 hover:text-red-700">
-                                            Excluir
-                                        </button>
-                                    </form>
+                                    <!-- BOTÃO DE EXCLUSÃO COM AJAX - CORREÇÃO CRÍTICA -->
+                                    <button type="button" 
+                                            class="delete-comment-btn text-xs text-red-500 hover:text-red-700" style="align-self: flex-end;"
+                                            data-comment-id="{{ comment.id }}">
+                                        Excluir
+                                    </button>
                                     {% endif %}
                                 </div>
                             </div>
@@ -389,6 +388,133 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+    
+    // ==================== CORREÇÃO CRÍTICA ====================
+    // Excluir comentário com AJAX (sem mostrar JSON como página)
+    document.addEventListener('click', async function(e) {
+        if (e.target.classList.contains('delete-comment-btn')) {
+            e.preventDefault();
+            
+            const commentId = e.target.dataset.commentId;
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            
+            if (!confirm('Tem certeza que deseja excluir este comentário?')) {
+                return;
+            }
+            
+            const commentElement = document.getElementById(`comment-${commentId}`);
+            
+            try {
+                const response = await fetch(`/api/comment/${commentId}/delete/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Erro HTTP: ${response.status}`);
+                }
+                
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Resposta não é JSON');
+                }
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    // Remove o comentário do DOM com animação
+                    if (commentElement) {
+                        commentElement.style.transition = 'opacity 0.3s, transform 0.3s';
+                        commentElement.style.opacity = '0';
+                        commentElement.style.transform = 'translateX(-20px)';
+                        
+                        setTimeout(() => {
+                            commentElement.remove();
+                            
+                            // Atualiza contador de comentários
+                            const commentCountElement = document.querySelector('.comment-count');
+                            if (commentCountElement && data.comments_count !== undefined) {
+                                commentCountElement.textContent = data.comments_count;
+                            }
+                            
+                            // Se não houver mais comentários, mostra mensagem
+                            const commentsList = document.getElementById('comments-list');
+                            if (commentsList && commentsList.children.length === 0) {
+                                const emptyMsg = document.createElement('div');
+                                emptyMsg.className = 'text-center py-8';
+                                emptyMsg.innerHTML = '<p class="text-gray-600 dark:text-gray-400">Nenhum comentário ainda. Seja o primeiro a comentar!</p>';
+                                commentsList.appendChild(emptyMsg);
+                            }
+                            
+                            // Mostra mensagem de sucesso
+                            showNotification('Comentário excluído com sucesso!', 'success');
+                        }, 300);
+                    }
+                } else {
+                    alert('Erro: ' + (data.message || 'Erro ao excluir comentário'));
+                }
+            } catch (error) {
+                console.error('Erro ao excluir comentário:', error);
+                alert('Erro ao excluir comentário. Por favor, tente novamente.');
+            }
+        }
+    });
+    
+    // Função para mostrar notificações (opcional)
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg transition-all duration-300 transform translate-y-[-100px] animate-slideDown ${
+            type === 'success' ? 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300' :
+            type === 'error' ? 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-300' :
+            'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300'
+        }`;
+        notification.innerHTML = `
+            <div class="flex items-center">
+                <span class="mr-2">${type === 'success' ? '✓' : type === 'error' ? '✗' : 'ℹ'}</span>
+                <span>${message}</span>
+                <button class="ml-4 text-lg" onclick="this.parentElement.parentElement.remove()">×</button>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Anima para mostrar
+        setTimeout(() => {
+            notification.style.transform = 'translateY(0)';
+        }, 10);
+        
+        // Remove após 3 segundos
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            notification.style.transform = 'translateY(-10px)';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, 3000);
+    }
 });
 </script>
+
+<style>
+@keyframes slideDown {
+    from {
+        transform: translateY(-100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.animate-slideDown {
+    animation: slideDown 0.3s ease-out;
+}
+</style>
 {% endblock %}

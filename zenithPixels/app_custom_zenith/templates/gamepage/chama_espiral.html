@@ -1,0 +1,219 @@
+{% extends 'baseChama_espiral.html' %}
+{% load static %}
+
+{% block title %}Chama Espiral - Zenith Pixels{% endblock %}
+
+{% block content %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+    /* --- REMOVENDO A NAV BAR PADRÃO (se necessário sobrescrever base) --- */
+    .main-nav {
+        display: none !important;
+    }
+
+    /* --- Fontes Personalizadas --- */
+    .font-tech {
+        font-family: 'Orbitron', sans-serif;
+    }
+    .font-body {
+        font-family: 'Rajdhani', sans-serif;
+    }
+
+    /* --- Animação do Título (Grow Effect) --- */
+    @keyframes growSequence {
+        0% { opacity: 0; transform: scale(0.5); }
+        5% { opacity: 1; transform: scale(1); }
+        95% { opacity: 1; transform: scale(1); }
+        100% { opacity: 0; transform: scale(1); }
+    }
+
+    .animate-grow-loop {
+        animation: growSequence 40s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+        animation-fill-mode: forwards; 
+    }
+
+    /* --- Animação de Scroll (Esquerda para Direita) --- */
+    .hidden-left {
+        opacity: 0;
+        transform: translateX(-100px);
+        transition: all 1s ease-out;
+    }
+
+    .show-slide-in {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    /* --- Estilos Gerais --- */
+    .hero-gradient {
+        background: radial-gradient(circle at center, #1e40af 0%, #0f172a 100%);
+    }
+    
+    .text-glow {
+        text-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+    }
+</style>
+
+<nav class="fixed top-6 left-6 z-50">
+    <a href="{% url 'home' %}" class="flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-full hover:bg-white/20 transition-all group">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        <span class="font-tech text-sm">Zenith Pixels</span>
+    </a>
+</nav>
+
+{% if user.is_staff %}
+<div class="fixed bottom-6 right-6 z-50 group">
+    <a href="/admin/" title="Painel Administrativo" class="flex items-center justify-center w-14 h-14 bg-blue-600/30 hover:bg-blue-600 border border-blue-400/50 backdrop-blur-md rounded-full text-blue-200 hover:text-white transition-all shadow-lg hover:shadow-blue-500/50 hover:rotate-90 duration-500">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+    </a>
+</div>
+{% endif %}
+
+<section class="relative min-h-screen flex flex-col items-center justify-center text-center px-4 overflow-hidden hero-gradient">
+    <div class="absolute inset-0 opacity-10" 
+         style="background-image: linear-gradient(#3b82f6 1px, transparent 1px), linear-gradient(90deg, #3b82f6 1px, transparent 1px); background-size: 40px 40px;">
+    </div>
+
+    <div class="relative z-10 max-w-4xl mx-auto">
+        <div class="flex flex-col items-center justify-center mb-6">
+            <svg class="w-16 h-16 text-blue-400 mb-4 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
+            </svg>
+            
+            <h1 class="font-tech text-6xl md:text-8xl font-black text-white tracking-wider text-glow animate-grow-loop">
+                CHAMA ESPIRAL
+            </h1>
+        </div>
+
+        <p class="font-body text-xl md:text-2xl text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed">
+            Uma experiência interativa onde mistério e tecnologia se entrelaçam. Desvende os segredos através de puzzles envolventes.
+        </p>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button class="px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-tech font-bold rounded-lg shadow-lg shadow-blue-600/50 transition-all hover:scale-105 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                START DEMO
+            </button>
+            
+            <a href="{% url 'lore_portal' %}" class="px-8 py-4 border border-blue-400/60 bg-transparent text-white font-tech font-bold rounded-lg hover:bg-blue-600/20 hover:border-blue-300 transition-all hover:scale-105 flex items-center gap-2 backdrop-blur-sm cursor-pointer">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                Explore Lore
+            </a>
+        </div>
+    </div>
+    
+    <div class="absolute bottom-8 animate-bounce text-blue-400">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+        </svg>
+    </div>
+</section>
+
+<section id="features" class="py-24 bg-white relative">
+    <div class="max-w-7xl mx-auto px-6">
+        <div class="text-center mb-16">
+            <h2 class="font-tech text-4xl md:text-5xl font-bold text-gray-900 mb-4 uppercase">Mecânicas do Jogo</h2>
+            <p class="font-body text-xl text-gray-500">Domine as habilidades necessárias para controlar a Chama Espiral</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            <div class="scroll-animate hidden-left bg-white p-8 rounded-2xl border border-blue-100 shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
+                <div class="w-14 h-14 bg-blue-600 rounded-lg flex items-center justify-center mb-6 text-white shadow-lg shadow-blue-600/30">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                    </svg>
+                </div>
+                <h3 class="font-tech text-xl font-bold text-gray-800 mb-3">Puzzles Interativos</h3>
+                <p class="font-body text-gray-600 leading-relaxed">
+                    Resolva enigmas complexos usando física, lógica e a energia da Chama Espiral para progredir através dos níveis.
+                </p>
+            </div>
+
+            <div class="scroll-animate hidden-left bg-white p-8 rounded-2xl border border-blue-100 shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-300" style="transition-delay: 200ms;">
+                <div class="w-14 h-14 bg-blue-600 rounded-lg flex items-center justify-center mb-6 text-white shadow-lg shadow-blue-600/30">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+                    </svg>
+                </div>
+                <h3 class="font-tech text-xl font-bold text-gray-800 mb-3">Controle de Energia</h3>
+                <p class="font-body text-gray-600 leading-relaxed">
+                    Manipule a Chama Espiral para alterar o ambiente, revelar caminhos ocultos e desbloquear novos poderes.
+                </p>
+            </div>
+
+            <div class="scroll-animate hidden-left bg-white p-8 rounded-2xl border border-blue-100 shadow-xl hover:shadow-2xl hover:-translate-y-2 transition-all duration-300" style="transition-delay: 400ms;">
+                <div class="w-14 h-14 bg-blue-600 rounded-lg flex items-center justify-center mb-6 text-white shadow-lg shadow-blue-600/30">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                </div>
+                <h3 class="font-tech text-xl font-bold text-gray-800 mb-3">Fragmentos de Lore</h3>
+                <p class="font-body text-gray-600 leading-relaxed">
+                    Colete fragmentos narrativos espalhados pelo mundo para desvendar a história completa e os mistérios antigos.
+                </p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<section class="py-24 bg-[#1e3a8a] text-center relative overflow-hidden">
+    <div class="absolute inset-0 bg-blue-900/50"></div>
+    
+    <div class="relative z-10 max-w-3xl mx-auto px-6">
+        <h2 class="font-tech text-4xl md:text-6xl font-bold text-white mb-6">Pronto para Começar?</h2>
+        <p class="font-body text-xl text-blue-100 mb-10">
+            Embarque em uma jornada inesquecível através de mistérios ancestrais.
+        </p>
+        
+        <button class="px-10 py-4 bg-white text-blue-900 font-tech font-bold text-lg rounded-xl hover:bg-blue-50 transition-all hover:scale-105 shadow-xl flex items-center justify-center gap-3 mx-auto">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Iniciar Experiência
+        </button>
+    </div>
+</section>
+
+<script>
+    // --- Intersection Observer para Animação de Scroll (Esquerda -> Direita) ---
+    document.addEventListener('DOMContentLoaded', () => {
+        const observerOptions = {
+            root: null, // viewport
+            threshold: 0.1, // Dispara quando 10% do elemento aparece
+            rootMargin: "0px" 
+        };
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    // Adiciona a classe que traz o elemento de volta à posição original (0)
+                    entry.target.classList.add('show-slide-in');
+                    // Opcional: Parar de observar depois de animar uma vez
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        // Seleciona todos os elementos com a classe .scroll-animate
+        const animatedElements = document.querySelectorAll('.scroll-animate');
+        animatedElements.forEach(el => observer.observe(el));
+    });
+</script>
+{% endblock %}

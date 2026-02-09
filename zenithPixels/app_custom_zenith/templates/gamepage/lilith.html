@@ -1,0 +1,429 @@
+{% extends 'baseChama_espiral.html' %}
+{% load static %}
+
+{% block title %}Lilith: Search Truth - Zenith Pixels{% endblock %}
+
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Cinzel:wght@400;700;900&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+<style>
+    /* --- Paleta de Cores e Variáveis --- */
+    :root {
+        --lilith-bg: #0f0510;       /* Fundo quase preto/roxo */
+        --lilith-accent: #3b82f6;   /* Azul Neon (Orbe) */
+        --lilith-red: #881337;      /* Vermelho Sangue (Lanças) */
+        --lilith-text: #e5e7eb;     /* Texto claro */
+        --lilith-gold: #fbbf24;     /* Detalhes Dourados */
+    }
+
+    body {
+        background-color: var(--lilith-bg);
+        font-family: 'Cinzel', serif;
+        color: var(--lilith-text);
+    }
+
+    /* --- Animação do Texto (40s loop) --- */
+    /* Começa pequeno, cresce, e volta */
+    @keyframes textGrow {
+        0% { transform: scale(0.8); opacity: 0.8; }
+        50% { transform: scale(1.1); opacity: 1; text-shadow: 0 0 30px rgba(59, 130, 246, 0.8); }
+        100% { transform: scale(0.8); opacity: 0.8; }
+    }
+
+    .title-pulse {
+        animation: textGrow 40s infinite ease-in-out;
+        display: inline-block;
+        /* Estilo para garantir leitura sobre o background complexo */
+        text-shadow: 4px 4px 0px #000, 0 0 20px rgba(0,0,0,0.8);
+    }
+
+    /* --- Divisórias Ornamentadas (Estilo Gótico) --- */
+    .ornate-divider {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 4rem 0 2rem 0;
+        position: relative;
+    }
+    .ornate-divider::before, .ornate-divider::after {
+        content: "";
+        height: 1px;
+        background: linear-gradient(90deg, transparent, #9ca3af, transparent);
+        flex: 1;
+        max-width: 150px;
+    }
+    .ornate-logo {
+        margin: 0 20px;
+        color: white;
+    }
+    .ornate-text {
+        font-family: 'Press Start 2P', cursive;
+        font-size: 1.5rem;
+        text-transform: uppercase;
+        color: white;
+        text-shadow: 0 4px 10px rgba(255, 255, 255, 0.3);
+        margin-top: 10px;
+        display: block;
+        text-align: center;
+    }
+
+    /* --- Cards de Personagens e Regiões --- */
+    .section-card {
+        transition: all 0.3s ease;
+        border: 1px solid #374151;
+    }
+    .section-card:hover {
+        border-color: var(--lilith-gold);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+
+    /* Card Específico de Personagem (Pequeno) */
+    .char-card {
+        cursor: pointer;
+        border: 2px solid #1f2937;
+        transition: all 0.2s;
+        background-color: #111827;
+    }
+    .char-card:hover, .char-card.active {
+        border-color: var(--lilith-accent);
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+    }
+    /* Fundo vermelho atrás do retrato do personagem (conforme imagem) */
+    .char-bg-red {
+        background: linear-gradient(to bottom, #7f1d1d, #450a0a);
+    }
+
+    /* --- Moldura do Vídeo --- */
+    .video-frame {
+        border: 3px solid var(--lilith-accent);
+        box-shadow: 0 0 30px rgba(59, 130, 246, 0.2);
+        background: #000;
+    }
+
+    /* --- Navegação (Setas) --- */
+    .nav-arrow {
+        color: var(--lilith-gold);
+        font-size: 1.5rem;
+        cursor: pointer;
+        padding: 10px;
+        transition: transform 0.2s;
+    }
+    .nav-arrow:hover {
+        transform: scale(1.2);
+        text-shadow: 0 0 10px var(--lilith-gold);
+    }
+    
+    /* Fade no fundo do Header para o corpo */
+    .header-fade-bottom {
+        background: linear-gradient(to bottom, transparent 0%, var(--lilith-bg) 90%);
+    }
+</style>
+
+<div class="fixed top-6 left-6 z-50">
+    <a href="{% url 'home' %}" class="flex items-center gap-2 px-5 py-2 bg-black/60 hover:bg-purple-900/90 border border-purple-500/50 text-white rounded backdrop-blur-md transition-all group font-mono text-sm">
+        <i class="fas fa-arrow-left group-hover:-translate-x-1 transition-transform"></i>
+        <span>ZENITH STUDIO</span>
+    </a>
+</div>
+
+<section class="relative w-full flex flex-col items-center justify-start pt-32 pb-20">
+    
+    <div class="absolute inset-0 z-0">
+        <img src="{% static 'img/image_4e4261.jpg' %}" 
+             alt="Lilith Background" 
+             class="w-full h-full object-cover object-top opacity-80">
+        
+        <div class="absolute bottom-0 left-0 w-full h-48 header-fade-bottom"></div>
+    </div>
+
+    <div class="relative z-10 text-center mb-10 px-4">
+        <div class="title-pulse">
+            <h1 class="text-5xl md:text-7xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-blue-200 via-blue-400 to-blue-600" 
+                style="font-family: 'Press Start 2P', cursive; -webkit-text-stroke: 2px black;">
+                LILITY
+            </h1>
+            <h2 class="text-2xl md:text-4xl text-white mt-2 tracking-widest font-bold" 
+                style="font-family: 'Press Start 2P', cursive; text-shadow: 0 0 10px #2563eb;">
+                SEARCH TRUTH
+            </h2>
+        </div>
+    </div>
+
+    <div class="relative z-20 w-full max-w-3xl px-4 mt-8">
+        <div class="video-frame rounded-lg overflow-hidden aspect-video relative group">
+            <iframe class="w-full h-full" src="https://www.youtube.com/embed/SEU_VIDEO_ID" title="Lilith Gameplay" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            
+            <div class="absolute -inset-1 bg-blue-500/20 blur-xl -z-10 group-hover:bg-blue-500/30 transition-all duration-500"></div>
+        </div>
+    </div>
+
+</section>
+
+<section class="py-8 px-4 max-w-6xl mx-auto relative z-10">
+    <div class="ornate-divider">
+        <div class="text-center">
+            <img src="{% static 'img/divider_ornament.png' %}" class="h-8 mx-auto mb-2 opacity-80" onerror="this.style.display='none'"> 
+            <span class="ornate-text">Regiões</span>
+        </div>
+    </div>
+
+    <div class="flex items-center justify-between gap-4">
+        <button class="nav-arrow"><i class="fas fa-chevron-left"></i></button>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
+            <div class="section-card bg-gray-900 rounded-lg overflow-hidden relative group cursor-pointer">
+                <div class="h-40 overflow-hidden">
+                    <img src="https://placehold.co/400x300/301010/white?text=Fuga" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                </div>
+                <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black via-black/90 to-transparent p-4 text-center">
+                    <h3 class="text-white font-bold font-mono">Fuga Lility</h3>
+                    <p class="text-[10px] text-gray-400 mt-1 uppercase tracking-widest">Toque para saber mais</p>
+                </div>
+            </div>
+
+            <div class="section-card bg-gray-900 rounded-lg overflow-hidden relative group cursor-pointer border-blue-900/50">
+                <div class="h-40 overflow-hidden">
+                    <div class="absolute top-2 right-2 z-10 text-yellow-400"><i class="fas fa-moon"></i></div>
+                    <img src="https://placehold.co/400x300/101030/white?text=Tempo" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                </div>
+                <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black via-black/90 to-transparent p-4 text-center">
+                    <h3 class="text-white font-bold font-mono">Dimensão do Tempo</h3>
+                    <p class="text-[10px] text-gray-400 mt-1 uppercase tracking-widest">Toque para saber mais</p>
+                </div>
+            </div>
+
+            <div class="section-card bg-gray-900 rounded-lg overflow-hidden relative group cursor-pointer">
+                <div class="h-40 overflow-hidden">
+                    <img src="https://placehold.co/400x300/103010/white?text=Montanha" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                </div>
+                <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black via-black/90 to-transparent p-4 text-center">
+                    <h3 class="text-white font-bold font-mono">Montanha Entrelaçada</h3>
+                    <p class="text-[10px] text-gray-400 mt-1 uppercase tracking-widest">Toque para saber mais</p>
+                </div>
+            </div>
+        </div>
+
+        <button class="nav-arrow"><i class="fas fa-chevron-right"></i></button>
+    </div>
+</section>
+
+<section class="py-12 px-4 relative z-10">
+    <div class="ornate-divider">
+        <span class="ornate-text">LILITY</span>
+    </div>
+    
+    <div class="max-w-4xl mx-auto border border-white/20 p-1 rounded-xl bg-black/40 backdrop-blur-sm">
+        <div class="flex flex-col md:flex-row bg-[#1a1a1a] rounded-lg overflow-hidden border border-gray-700">
+            <div class="w-full md:w-5/12 relative min-h-[300px] bg-gradient-to-b from-gray-700 to-gray-900">
+                <img src="{% static 'img/lility_art.png' %}" 
+                     class="w-full h-full object-cover absolute inset-0 mix-blend-normal hover:mix-blend-overlay transition-all duration-500"
+                     alt="Lility Art">
+                
+                <div class="absolute bottom-4 w-full flex justify-center gap-2 z-20">
+                    <span class="w-2 h-2 rounded-full bg-white shadow-glow"></span>
+                    <span class="w-2 h-2 rounded-full bg-gray-600 border border-gray-400"></span>
+                    <span class="w-2 h-2 rounded-full bg-gray-600 border border-gray-400"></span>
+                </div>
+            </div>
+            
+            <div class="w-full md:w-7/12 p-8 flex flex-col justify-center text-right">
+                <h3 class="text-xl leading-relaxed font-bold text-gray-100 mb-6 font-mono">
+                    uma jovem determinada a derrubar o regime opressor após seu pai ser capturado.
+                </h3>
+                <p class="text-gray-400 text-xs leading-6 mb-8 font-sans">
+                    Para alcançar seu objetivo, ela se une a revolucionários e rebeldes, enfrentando desafios e descobrindo os segredos ocultos nas profundezas do império.
+                </p>
+                <div class="flex justify-end">
+                    <button class="px-8 py-2 bg-gradient-to-b from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white border border-gray-500 rounded font-bold text-xs uppercase tracking-widest shadow-lg transition-all">
+                        Saber mais
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-12 px-4 relative z-10">
+    <div class="ornate-divider">
+        <span class="ornate-text">PERSONAGENS</span>
+    </div>
+
+    <div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+        
+        <div class="col-span-1 md:col-span-3 flex flex-col gap-4">
+            <div class="char-card active rounded-lg p-1" onclick="selectCharacter('lility', this)">
+                <div class="char-bg-red h-24 rounded-t flex items-end justify-center relative overflow-hidden">
+                    <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/diagmonds-light.png')] opacity-20"></div>
+                    <img src="https://placehold.co/100x100/transparent/white?text=L" class="h-20 w-20 object-contain z-10">
+                </div>
+                <div class="bg-black/80 p-2 text-center rounded-b border-t border-gray-700">
+                    <h4 class="font-bold text-white font-mono text-sm">Lility</h4>
+                    <p class="text-[10px] text-gray-400 flex items-center justify-center gap-1">
+                        Toque para exibir no painel <i class="fas fa-arrow-right text-[8px]"></i>
+                    </p>
+                </div>
+            </div>
+            
+            <div class="char-card rounded-lg p-1" onclick="selectCharacter('robert', this)">
+                <div class="char-bg-red h-24 rounded-t flex items-end justify-center relative overflow-hidden">
+                    <img src="https://placehold.co/100x100/transparent/white?text=R" class="h-20 w-20 object-contain z-10">
+                </div>
+                <div class="bg-black/80 p-2 text-center rounded-b border-t border-gray-700">
+                    <h4 class="font-bold text-white font-mono text-sm">Robert</h4>
+                    <p class="text-[10px] text-gray-400">Toque para exibir no painel</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-span-1 md:col-span-6">
+            <div class="bg-gray-200 text-black p-1 rounded shadow-2xl transform scale-100 md:scale-105 z-20 relative">
+                <div class="bg-[#d1d5db] p-6 rounded inner-shadow flex flex-col md:flex-row gap-6 items-start min-h-[320px]">
+                    <div class="flex-1 text-left">
+                        <h3 id="char-name" class="text-3xl font-black uppercase mb-1 tracking-tighter">LILITY</h3>
+                        <p id="char-role" class="text-xs font-bold text-gray-600 mb-6 uppercase">Personagem Principal</p>
+                        
+                        <p id="char-desc" class="text-[11px] font-bold text-gray-700 leading-relaxed font-mono mb-4">
+                            userfglnwsenmsgigvewuf gewsf wsgfiju esomjf wenmo iwo ifoiwe nmof ieus fklanusmofoenou nio ikjoi fnoiu.
+                        </p>
+                        <p class="text-[11px] font-bold text-gray-700 leading-relaxed font-mono">
+                            Ainda tem mais eiowgioweifgenfnicefo wef nwefnwe fkjnwefk fijeujnifewij fojnie klf kjew foke fkoi wsekjno.
+                        </p>
+                    </div>
+
+                    <div class="w-40 flex-shrink-0 flex flex-col items-center">
+                        <h4 class="font-bold text-sm mb-2 uppercase">Animações</h4>
+                        <div class="bg-white border-2 border-black rounded p-2 w-full aspect-square flex items-center justify-between relative shadow-lg">
+                            <button class="text-xl hover:text-gray-500 absolute left-1"><</button>
+                            <div class="flex-1 flex items-center justify-center">
+                                <img id="char-anim" src="https://placehold.co/60x80/transparent/blue?text=Idle" class="scale-150">
+                            </div>
+                            <button class="text-xl hover:text-gray-500 absolute right-1">></button>
+                        </div>
+                        <div class="flex gap-1 mt-2">
+                            <div class="w-1.5 h-1.5 bg-black rounded-full"></div>
+                            <div class="w-1.5 h-1.5 bg-gray-400 rounded-full border border-black"></div>
+                            <div class="w-1.5 h-1.5 bg-gray-400 rounded-full border border-black"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-span-1 md:col-span-3 flex flex-col gap-4">
+            <div class="char-card rounded-lg p-1" onclick="selectCharacter('rendalla', this)">
+                <div class="char-bg-red h-24 rounded-t flex items-end justify-center relative overflow-hidden">
+                    <img src="https://placehold.co/100x100/transparent/white?text=Re" class="h-20 w-20 object-contain z-10">
+                </div>
+                <div class="bg-black/80 p-2 text-center rounded-b border-t border-gray-700">
+                    <h4 class="font-bold text-white font-mono text-sm">Rendalla</h4>
+                    <p class="text-[10px] text-gray-400"><-- Toque para exibir no painel</p>
+                </div>
+            </div>
+
+            <div class="char-card rounded-lg p-1" onclick="selectCharacter('france', this)">
+                <div class="char-bg-red h-24 rounded-t flex items-end justify-center relative overflow-hidden">
+                    <img src="https://placehold.co/100x100/transparent/white?text=F" class="h-20 w-20 object-contain z-10">
+                </div>
+                <div class="bg-black/80 p-2 text-center rounded-b border-t border-gray-700">
+                    <h4 class="font-bold text-white font-mono text-sm">France</h4>
+                    <p class="text-[10px] text-gray-400"><-- Toque para exibir no painel</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<section class="py-16 px-4 pb-32">
+    <div class="ornate-divider">
+        <span class="ornate-text">MÍDIAS DO JOGO</span>
+    </div>
+    
+    <div class="max-w-4xl mx-auto relative group mt-8">
+        <div class="bg-blue-900/20 p-1 border-2 border-blue-500 rounded-lg shadow-[0_0_30px_rgba(59,130,246,0.2)]">
+            <div class="overflow-hidden rounded relative aspect-video bg-black">
+                <img src="{% static 'img/gameplay_screenshot.png' %}" 
+                     onerror="this.src='https://placehold.co/800x450/111/white?text=Ruinas+Geometricas+Gameplay'" 
+                     class="w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity">
+            </div>
+        </div>
+        
+        <button class="absolute top-1/2 left-0 -translate-y-1/2 -translate-x-full md:-translate-x-12 text-yellow-400 text-3xl p-2 hover:scale-125 transition-transform drop-shadow-[0_0_5px_rgba(250,204,21,0.5)]">
+            <i class="fas fa-chevron-left"></i>
+        </button>
+        <button class="absolute top-1/2 right-0 -translate-y-1/2 translate-x-full md:translate-x-12 text-yellow-400 text-3xl p-2 hover:scale-125 transition-transform drop-shadow-[0_0_5px_rgba(250,204,21,0.5)]">
+            <i class="fas fa-chevron-right"></i>
+        </button>
+    </div>
+</section>
+
+{% block scripts %}
+<script>
+    // --- Dados Dinâmicos dos Personagens ---
+    const characters = {
+        lility: {
+            name: "LILITY",
+            role: "Personagem Principal",
+            desc: "userfglnwsenmsgigvewuf gewsf wsgfiju esomjf wenmo iwo ifoiwe nmof ieus fklanusmofoenou nio ikjoi fnoiu.",
+            img: "https://placehold.co/60x80/transparent/blue?text=L"
+        },
+        robert: {
+            name: "ROBERT",
+            role: "Suporte Tático",
+            desc: "Robert fornece gadgets essenciais. O texto original estava em 'lorem ipsum' estilo pixel, mas aqui descrevemos sua função.",
+            img: "https://placehold.co/60x80/transparent/green?text=R"
+        },
+        rendalla: {
+            name: "RENDALLA",
+            role: "Líder Rebelde",
+            desc: "Rendalla comanda as forças de resistência nas cavernas inferiores. Mestre em combate de curta distância.",
+            img: "https://placehold.co/60x80/transparent/red?text=Re"
+        },
+        france: {
+            name: "FRANCE",
+            role: "Mercenário",
+            desc: "France é imprevisível e leal apenas ao ouro. Aparece em momentos cruciais da trama.",
+            img: "https://placehold.co/60x80/transparent/yellow?text=F"
+        }
+    };
+
+    function selectCharacter(charKey, cardElement) {
+        // Remove active class de todos
+        document.querySelectorAll('.char-card').forEach(c => c.classList.remove('active', 'border-blue-500'));
+        
+        // Adiciona active no clicado
+        cardElement.classList.add('active');
+
+        const data = characters[charKey];
+        if (!data) return;
+
+        // Elementos DOM
+        const nameEl = document.getElementById('char-name');
+        const roleEl = document.getElementById('char-role');
+        const descEl = document.getElementById('char-desc');
+        const imgEl = document.getElementById('char-anim');
+        const container = nameEl.closest('.bg-[#d1d5db]'); // Seleciona container interno
+
+        // Animação de troca (Fade rápido)
+        container.style.opacity = '0.5';
+        container.style.transform = 'scale(0.98)';
+        container.style.transition = 'all 0.2s ease';
+        
+        setTimeout(() => {
+            nameEl.textContent = data.name;
+            roleEl.textContent = data.role;
+            descEl.textContent = data.desc;
+            imgEl.src = data.img;
+            
+            // Restaura
+            container.style.opacity = '1';
+            container.style.transform = 'scale(1)';
+        }, 200);
+    }
+</script>
+{% endblock %}
+
+{% endblock %}

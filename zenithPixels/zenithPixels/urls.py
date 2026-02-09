@@ -23,13 +23,24 @@ from app_custom_zenith.views import (
     approve_comment,
     publish_post,
     archive_post,
-    delete_devlog_post
+    delete_devlog_post,
+    lilith_view,
+    chama_espiral_page,
+    lore_portal, 
 )
 
 urlpatterns = [
     # Página inicial
     path('', home, name='home'),
     
+    # --- ROTAS DOS JOGOS ---
+    path('chama_espiral/', chama_espiral_page, name='chama_espiral'),
+    path('chama-espiral/lore/', lore_portal, name='lore_portal'),
+    path('chama-espiral/lore/<int:fragment_id>/', lore_portal, name='lore_detail'),
+    
+    # Rota do Lilith
+    path('games/lilith/', lilith_view, name='lilith_page'),
+
     # Autenticação
     path('login/', custom_login, name='login'),
     path('logout/', custom_logout, name='logout'),
@@ -50,10 +61,10 @@ urlpatterns = [
     path('noticias/excluir/<slug:slug>/', delete_devlog_post, name='delete_devlog_post'),
     path('noticias/<slug:slug>/', devlog_post_detail, name='devlog_post_detail'),
     
-    # Comentários com slug (para o formulário HTML)
+    # Comentários com slug
     path('noticias/<slug:slug>/comentar/', add_comment, name='add_comment'),
     
-    # API - Interações (para AJAX/JavaScript)
+    # API - Interações
     path('api/post/<int:post_id>/like/', like_post, name='like_post'),
     path('api/post/<int:post_id>/share/', share_post, name='share_post'),
     path('api/post/<int:post_id>/comments/', get_comments, name='get_comments'),
