@@ -1,0 +1,9 @@
+# Django
+*.sqlite3
+*.pyc
+__pycache__/
+
+# Arquivos de desenvolvimento
+.DS_Store
+.idea/
+.vscode/

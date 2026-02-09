@@ -1,0 +1,394 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ post.title }} - Notícias{% endblock %}
+
+{% block content %}
+<div class="py-12 px-4 md:px-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Botão Voltar -->
+        <a href="{% url 'devlog' %}" class="inline-flex items-center gap-2 text-brand-yellow hover:text-brand-yellow/80 mb-8">
+            ← Voltar para Notícias
+        </a>
+
+        <!-- Cabeçalho do Post -->
+        <div class="mb-8">
+            <!-- Categoria -->
+            <div class="mb-2">
+                <span class="text-sm font-bold px-3 py-1 rounded-full inline-block" style="background-color: {{ post.category.color }}20; color: {{ post.category.color }}">
+                    {{ post.category.name|upper }}
+                </span>
+            </div>
+
+            <!-- Botões de Staff -->
+            {% if user.is_staff %}
+            <div class="flex items-center gap-2 mb-4">
+                <a href="{% url 'edit_devlog_post' post.slug %}" 
+                   class="text-sm bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
+                    Editar Notícia
+                </a>
+                <style>
+                    .inline {
+                        display: inline;
+                        align-self: end;
+                    }
+                </style>
+                <!-- Botão de Excluir para Staff -->
+                <form action="{% url 'delete_devlog_post' post.slug %}" method="POST" class="inline" onsubmit="return confirm('Tem certeza que deseja excluir esta notícia?');">
+                    {% csrf_token %}
+                    <button type="submit" class="text-sm bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-3 py-1 rounded hover:bg-red-200 dark:hover:bg-red-800/50">
+                        Excluir
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+            
+            <h1 class="text-3xl md:text-4xl font-bold mb-4">{{ post.title }}</h1>
+            
+            <div class="flex flex-wrap items-center gap-4 text-gray-600 dark:text-gray-400 mb-6">
+                <div class="flex items-center gap-2">
+                    {% if post.author.profile.get_profile_image_url %}
+                    <img src="{{ post.author.profile.get_profile_image_url }}" 
+                         alt="{{ post.author.get_full_name }}" 
+                         class="w-8 h-8 rounded-full">
+                    {% else %}
+                    <div class="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center">
+                        <span class="text-xs">{{ post.author.get_short_name|first|upper }}</span>
+                    </div>
+                    {% endif %}
+                    <span class="font-medium">{{ post.author.get_full_name }}</span>
+                    {% if post.author.is_superuser %}
+                    <span class="text-xs bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-300 px-2 py-1 rounded-full">
+                        Admin
+                    </span>
+                    {% elif post.author.is_staff %}
+                    <span class="text-xs bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300 px-2 py-1 rounded-full">
+                        Staff
+                    </span>
+                    {% endif %}
+                </div>
+                <span>•</span>
+                <span>{{ post.published_at|date:"d/m/Y H:i" }}</span>
+                <span>•</span>
+                <span>👁️ {{ post.view_count }} visualizações</span>
+            </div>
+        </div>
+
+        <!-- Imagem Destacada -->
+        {% if post.featured_image %}
+        <div class="mb-8 rounded-xl overflow-hidden">
+            <img src="{{ post.featured_image.url }}" 
+                 alt="{{ post.title }}" 
+                 class="w-full h-auto max-h-96 object-cover">
+        </div>
+        {% endif %}
+
+        <!-- Conteúdo do Post -->
+        <article class="prose prose-lg dark:prose-invert max-w-none mb-12">
+            {{ post.content|linebreaks|safe }}
+        </article>
+
+        <!-- Tags e Compartilhamento -->
+        <div class="border-t border-b border-gray-200 dark:border-gray-700 py-6 mb-8">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-2">
+                    <span class="text-gray-600 dark:text-gray-400">Compartilhar:</span>
+                    <button class="share-btn p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+                            data-post-id="{{ post.id }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M8.684 13.342C8.886 12.938 9 12.482 9 12s-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="flex items-center gap-4">
+                    <!-- Curtir -->
+                    <button class="like-btn flex items-center gap-2 hover:text-brand-yellow transition-colors {% if user_has_liked %}text-brand-yellow{% endif %}"
+                            data-post-id="{{ post.id }}"
+                            {% if not user.is_authenticated %}disabled title="Faça login para curtir"{% endif %}>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6"
+                            {% if user_has_liked %}fill="currentColor"{% else %}fill="none"{% endif %}
+                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                        <span class="like-count">{{ likes_count }}</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção de Comentários -->
+        <div id="comments-section" class="mb-12">
+            <h3 class="text-2xl font-bold mb-6">Comentários (<span class="comment-count">{{ comments_count }}</span>)</h3>
+            
+            <!-- Formulário para Adicionar Comentário -->
+            {% if user.is_authenticated %}
+            <div class="mb-8 bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                <h4 class="font-bold mb-4">Adicionar Comentário</h4>
+                <form id="add-comment-form" method="POST" action="{% url 'add_comment' post.slug %}">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <textarea name="content" 
+                                  id="comment-content" 
+                                  rows="4" 
+                                  class="w-full px-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-brand-yellow focus:border-transparent"
+                                  placeholder="Escreva seu comentário aqui..."
+                                  required></textarea>
+                    </div>
+                    <div class="flex justify-end">
+                        <button type="submit" 
+                                class="px-6 py-2 bg-brand-yellow text-white font-medium rounded-lg hover:bg-brand-yellow/90 transition-colors">
+                            Enviar Comentário
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {% else %}
+            <div class="mb-8 bg-gray-50 dark:bg-gray-800 p-6 rounded-lg text-center">
+                <p class="text-gray-600 dark:text-gray-400">
+                    <a href="{% url 'login' %}?next={{ request.path }}" class="text-brand-yellow hover:underline">
+                        Faça login
+                    </a> 
+                    para comentar nesta notícia.
+                </p>
+            </div>
+            {% endif %}
+            
+            <!-- Lista de Comentários -->
+            <div class="space-y-6" id="comments-list">
+                {% for comment in comments %}
+                <div class="comment bg-gray-50 dark:bg-gray-800 p-6 rounded-lg" id="comment-{{ comment.id }}">
+                    <div class="flex items-start gap-4">
+                        {% if comment.user.profile.get_profile_image_url %}
+                        <img src="{{ comment.user.profile.get_profile_image_url }}" 
+                             alt="{{ comment.user.get_short_name }}" 
+                             class="w-12 h-12 rounded-full object-cover">
+                        {% else %}
+                        <div class="w-12 h-12 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center">
+                            <span class="text-lg">{{ comment.user.get_short_name|first|upper }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <h4 class="font-bold">{{ comment.user.get_full_name }}</h4>
+                                        {% if comment.user == post.author %}
+                                            <span class="text-xs bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300 px-2 py-1 rounded-full">
+                                                Autor
+                                            </span>
+                                        {% endif %}
+                                    </div>
+                                    <p class="text-sm 
+                                        {% if comment.user.is_superuser %}
+                                            text-red-600 dark:text-red-400 font-bold
+                                        {% elif comment.user.is_staff %}
+                                            text-brand-yellow font-semibold
+                                        {% elif comment.user == post.author %}
+                                            text-blue-600 dark:text-blue-400
+                                        {% else %}
+                                            text-gray-500
+                                        {% endif %}">
+                                        {% if comment.user.is_superuser %}
+                                            Administrador
+                                        {% elif comment.user.is_staff %}
+                                            Staff
+                                        {% elif comment.user == post.author %}
+                                            Autor do Post
+                                        {% else %}
+                                            {{ comment.user.profile.role|default:"Membro" }}
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <div class="flex flex-col xs:flex-row xs:items-center gap-1 xs:gap-2">
+                                    <span class="text-sm text-gray-500">{{ comment.created_at|date:"d/m/Y H:i" }}</span>
+                                    {% if user.is_staff or user == comment.user %}
+                                    <!-- Botão para excluir comentário -->
+                                    <form action="{% url 'delete_comment' comment.id %}" method="POST" class="inline" onsubmit="return confirm('Tem certeza que deseja excluir este comentário?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="text-xs text-red-500 hover:text-red-700">
+                                            Excluir
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <p class="text-gray-700 dark:text-gray-300">{{ comment.content }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-8">
+                    <p class="text-gray-600 dark:text-gray-400">Nenhum comentário ainda. Seja o primeiro a comentar!</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Notícias Relacionadas -->
+        {% if related_posts %}
+        <div class="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
+            <h3 class="text-2xl font-bold mb-6">Notícias Relacionadas</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {% for related in related_posts %}
+                <a href="{% url 'devlog_post_detail' related.slug %}"
+                   class="group bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow hover:shadow-lg transition-shadow">
+                    {% if related.featured_image %}
+                    <img src="{{ related.featured_image.url }}" 
+                         alt="{{ related.title }}" 
+                         class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                    {% endif %}
+                    <div class="p-4">
+                        <span class="text-xs font-bold" style="color: {{ related.category.color }}">
+                            {{ related.category.name }}
+                        </span>
+                        <h4 class="font-bold mt-2 group-hover:text-brand-yellow">{{ related.title|truncatechars:60 }}</h4>
+                        <p class="text-sm text-gray-500 mt-2">{{ related.published_at|date:"d/m/Y" }}</p>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Curtir post na página de detalhe
+    const likeBtn = document.querySelector('.like-btn');
+    if (likeBtn && !likeBtn.disabled) {
+        likeBtn.addEventListener('click', async function(e) {
+            e.preventDefault();
+            
+            const postId = this.dataset.postId;
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            
+            try {
+                const response = await fetch(`/api/post/${postId}/like/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `csrfmiddlewaretoken=${encodeURIComponent(csrfToken)}`
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    const likeIcon = this.querySelector('svg');
+                    const likeCount = this.querySelector('.like-count');
+                    
+                    if (data.liked) {
+                        likeIcon.setAttribute('fill', 'currentColor');
+                        this.classList.add('text-brand-yellow');
+                    } else {
+                        likeIcon.setAttribute('fill', 'none');
+                        this.classList.remove('text-brand-yellow');
+                    }
+                    
+                    if (likeCount) {
+                        likeCount.textContent = data.likes_count;
+                    }
+                }
+            } catch (error) {
+                console.error('Erro ao curtir:', error);
+            }
+        });
+    }
+    
+    // Compartilhar
+    document.querySelector('.share-btn')?.addEventListener('click', async function() {
+        const postId = this.dataset.postId;
+        
+        try {
+            const response = await fetch(`/api/post/${postId}/share/`);
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                if (navigator.share) {
+                    navigator.share({
+                        title: data.title,
+                        text: data.message,
+                        url: data.url
+                    });
+                } else {
+                    navigator.clipboard.writeText(data.url);
+                    alert('Link copiado para a área de transferência!');
+                }
+            }
+        } catch (error) {
+            console.error('Erro ao compartilhar:', error);
+        }
+    });
+
+    // Adicionar comentário com AJAX
+    const commentForm = document.getElementById('add-comment-form');
+    if (commentForm) {
+        commentForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            
+            // Mostrar loading
+            submitBtn.textContent = 'Enviando...';
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch(this.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams(formData)
+                });
+                
+                // Verifica o tipo de conteúdo da resposta
+                const contentType = response.headers.get("content-type");
+                
+                if (contentType && contentType.includes("application/json")) {
+                    const data = await response.json();
+                    
+                    if (data.status === 'success') {
+                        // Limpa o formulário
+                        document.getElementById('comment-content').value = '';
+                        
+                        // Mostra mensagem de sucesso
+                        const successMsg = document.createElement('div');
+                        successMsg.className = 'mt-4 p-3 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300 rounded-lg';
+                        successMsg.textContent = 'Comentário enviado com sucesso! A página será recarregada...';
+                        this.appendChild(successMsg);
+                        
+                        // Recarrega após 1.5 segundos
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1500);
+                    } else {
+                        alert(data.message || 'Erro ao adicionar comentário');
+                    }
+                } else {
+                    // Se não for JSON, algo está errado
+                    alert('Erro no servidor. Por favor, tente novamente.');
+                }
+            } catch (error) {
+                console.error('Erro ao adicionar comentário:', error);
+                alert('Erro de conexão. Por favor, tente novamente.');
+            } finally {
+                // Restaura o botão
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

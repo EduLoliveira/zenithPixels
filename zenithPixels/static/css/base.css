@@ -1,0 +1,128 @@
+/* baseHTML */
+:root {
+    --scrollbar-width: 8px;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    padding-top: 4rem;
+    /* Espaço para o header mobile */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+}
+
+.modal-scrollbar::-webkit-scrollbar {
+    width: var(--scrollbar-width);
+}
+
+.modal-scrollbar::-webkit-scrollbar-track {
+    background: #2d3748;
+}
+
+.modal-scrollbar::-webkit-scrollbar-thumb {
+    background: #facc15;
+    border-radius: 4px;
+}
+
+.mobile-menu {
+    transition: max-height 0.3s ease-in-out, opacity 0.2s ease, transform 0.2s ease;
+    max-height: 0;
+    overflow: hidden;
+    transform-origin: top;
+    opacity: 0;
+    transform: scaleY(0);
+}
+
+.mobile-menu.open {
+    max-height: 100vh;
+    opacity: 1;
+    transform: scaleY(1);
+}
+
+@media (min-width: 768px) {
+    body {
+        padding-top: 0;
+        padding-left: 4rem;
+        /* Espaço para a nav lateral em desktop */
+    }
+}
+
+/* Animação do ícone do menu */
+#menu-icon {
+    transition: transform 0.3s ease;
+}
+
+#menu-icon.rotate-90 {
+    transform: rotate(90deg);
+}
+
+/* Garantir que o main ocupe o espaço disponível */
+main {
+    flex: 1;
+}
+
+.mobile-menu {
+    transition: all 0.3s ease-in-out;
+    transform-origin: top;
+}
+
+.mobile-menu.max-h-0 {
+    display: block !important;
+    /* Importante para a animação funcionar */
+    opacity: 0;
+    max-height: 0;
+    transform: scaleY(0);
+}
+
+.mobile-menu.max-h-screen {
+    opacity: 1;
+    max-height: 100vh;
+    transform: scaleY(1);
+}
+
+
+/* BaseLogin  */
+
+body {
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    padding-left: 4rem;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+.modal-scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-scrollbar::-webkit-scrollbar-track {
+    background: #2d3748;
+}
+
+.modal-scrollbar::-webkit-scrollbar-thumb {
+    background: #facc15;
+    border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+    body {
+        padding-left: 0;
+        padding-bottom: 4rem;
+    }
+}

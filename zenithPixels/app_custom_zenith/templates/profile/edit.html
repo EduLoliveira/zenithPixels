@@ -1,0 +1,262 @@
+{% extends 'baseLogin.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <hr>
+    <br>
+    <br>
+    <form id="profile-form" action="{% url 'profile_update' %}" method="POST" enctype="multipart/form-data"
+        class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden p-6">
+        {% csrf_token %}
+
+        <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Editar Perfil</h2>
+
+        <div class="flex flex-col md:flex-row gap-6 mb-8">
+            <!-- Foto do perfil -->
+            <div class="w-full md:w-1/3 flex flex-col items-center">
+                <div class="relative group mb-4">
+                    <img id="profile-image-preview" src="{{ user.profile.get_profile_image_url }}" alt="Foto do perfil"
+                        class="w-40 h-40 rounded-full object-cover border-4 border-yellow-400 shadow-md profile-image">
+                    <input type="file" id="profile-image-input" name="profile_image" accept="image/*" class="hidden">
+                    <label for="profile-image-input"
+                        class="absolute inset-0 flex items-center justify-center bg-black/30 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                        <i class="fas fa-camera text-white text-2xl"></i>
+                    </label>
+                </div>
+                <button type="button" onclick="document.getElementById('profile-image-input').click()"
+                    class="text-yellow-500 hover:text-yellow-600 text-sm font-medium">
+                    Alterar Foto
+                </button>
+            </div>
+            
+            <!-- Informações básicas -->
+            <div class="w-full md:w-2/3 space-y-4">
+                <!-- Nome e Sobrenome editáveis -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-gray-700 dark:text-gray-300 mb-1">Nome</label>
+                        <input type="text" name="first_name" value="{{ user.first_name }}"
+                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 dark:bg-gray-700 dark:border-gray-600"
+                            required>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 dark:text-gray-300 mb-1">Sobrenome</label>
+                        <input type="text" name="last_name" value="{{ user.last_name }}"
+                            class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 dark:bg-gray-700 dark:border-gray-600"
+                            required>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300 mb-1">Cargo/Função</label>
+                    <input type="text" name="role" value="{{ profile_data.role|default:'' }}"
+                        placeholder="Sua função na equipe"
+                        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 dark:bg-gray-700 dark:border-gray-600">
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 dark:text-gray-300 mb-1">Data de Entrada</label>
+                    <input type="date" name="data_entrada" value="{{ profile_data.data_entrada|date:'Y-m-d' }}"
+                        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 dark:bg-gray-700 dark:border-gray-600">
+                </div>
+            </div>
+        </div>
+
+        <!-- Biografia -->
+        <div class="mb-6">
+            <label class="block text-gray-700 dark:text-gray-300 mb-1">Biografia</label>
+            <textarea name="bio" rows="4"
+                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 dark:bg-gray-700 dark:border-gray-600"
+                placeholder="Conte um pouco sobre você...">{{ profile_data.bio|default:'' }}</textarea>
+        </div>
+
+        <!-- Redes Sociais -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div>
+                <label class="block text-gray-700 dark:text-gray-300 mb-1">Twitter</label>
+                <div class="flex">
+                    <span
+                        class="inline-flex items-center px-3 text-gray-500 bg-gray-100 border border-r-0 border-gray-300 rounded-l-lg dark:bg-gray-600 dark:text-gray-400 dark:border-gray-600">
+                        @
+                    </span>
+                    <input type="text" name="twitter" value="{{ profile_data.twitter|default:'' }}"
+                        placeholder="seu_usuario"
+                        class="flex-1 px-4 py-2 border rounded-r-lg focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 dark:bg-gray-700 dark:border-gray-600">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 dark:text-gray-300 mb-1">LinkedIn</label>
+                <div class="flex">
+                    <span
+                        class="inline-flex items-center px-3 text-gray-500 bg-gray-100 border border-r-0 border-gray-300 rounded-l-lg dark:bg-gray-600 dark:text-gray-400 dark:border-gray-600">
+                        in/
+                    </span>
+                    <input type="text" name="linkedin" value="{{ profile_data.linkedin|default:'' }}"
+                        placeholder="seu_perfil"
+                        class="flex-1 px-4 py-2 border rounded-r-lg focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 dark:bg-gray-700 dark:border-gray-600">
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-end gap-4">
+            <a href="{% url 'profile' %}"
+                class="bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-medium py-2 px-6 rounded-lg transition-colors">
+                <i class="fas fa-times mr-2"></i> Cancelar
+            </a>
+            <button type="submit"
+                class="bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-bold py-2 px-6 rounded-lg transition-colors">
+                <i class="fas fa-save mr-2"></i> Salvar Alterações
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Preview da imagem
+        document.getElementById('profile-image-input').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Verifica o tamanho do arquivo (máximo 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('A imagem deve ter no máximo 5MB');
+                    return;
+                }
+
+                // Verifica o tipo do arquivo
+                if (!file.type.match('image.*')) {
+                    alert('Por favor, selecione um arquivo de imagem válido');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    document.getElementById('profile-image-preview').src = event.target.result;
+                    // Atualiza também a imagem no modal se existir
+                    const modalImg = document.getElementById('modal-profile-img');
+                    if (modalImg) {
+                        modalImg.src = event.target.result;
+                    }
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Validação antes do envio
+        document.getElementById('profile-form').addEventListener('submit', function(e) {
+            const firstName = document.querySelector('input[name="first_name"]').value.trim();
+            const lastName = document.querySelector('input[name="last_name"]').value.trim();
+            
+            if (!firstName) {
+                alert('Por favor, informe seu nome');
+                e.preventDefault();
+                return;
+            }
+            
+            if (!lastName) {
+                alert('Por favor, informe seu sobrenome');
+                e.preventDefault();
+                return;
+            }
+        });
+
+        // Envio do formulário via AJAX
+        document.getElementById('profile-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const form = e.target;
+            const formData = new FormData(form);
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalButtonText = submitButton.innerHTML;
+
+            // Mostra loading no botão
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Salvando...';
+            submitButton.disabled = true;
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                credentials: 'same-origin'
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => { throw err; });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Atualiza todas as instâncias da imagem de perfil
+                        document.querySelectorAll('.profile-image').forEach(img => {
+                            img.src = data.profile_image_url + '?' + new Date().getTime(); // Cache busting
+                        });
+
+                        // Mostra mensagem de sucesso
+                        const toast = document.createElement('div');
+                        toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg';
+                        toast.innerHTML = '<i class="fas fa-check-circle mr-2"></i>' + (data.message || 'Perfil atualizado com sucesso!');
+                        document.body.appendChild(toast);
+                        
+                        setTimeout(() => {
+                            toast.remove();
+                            window.location.href = "{% url 'profile' %}";
+                        }, 2000);
+                    } else {
+                        throw new Error(data.message || 'Erro ao salvar perfil');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    const toast = document.createElement('div');
+                    toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg';
+                    toast.innerHTML = '<i class="fas fa-exclamation-circle mr-2"></i>' + (error.message || 'Erro ao enviar formulário');
+                    document.body.appendChild(toast);
+                    setTimeout(() => toast.remove(), 3000);
+                })
+                .finally(() => {
+                    // Restaura o botão
+                    submitButton.innerHTML = originalButtonText;
+                    submitButton.disabled = false;
+                });
+        });
+    });
+</script>
+
+<style>
+    /* Estilo para o input de data */
+    input[type="date"] {
+        appearance: none;
+        -webkit-appearance: none;
+        padding: 0.5rem 1rem;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpath d='M21 10H3M16 2v4M8 2v4M3 6h18a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right 0.5rem center;
+        background-size: 1.2rem;
+    }
+
+    /* Dark mode para inputs */
+    .dark input[type="date"],
+    .dark input[type="text"],
+    .dark textarea {
+        background-color: #374151;
+        border-color: #4b5563;
+        color: #f3f4f6;
+    }
+
+    /* Estilo para mensagens de toast */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fixed.top-4.right-4 {
+        animation: fadeIn 0.3s ease-out;
+    }
+</style>
+{% endblock %}

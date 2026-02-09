@@ -1,0 +1,262 @@
+{% extends 'baseLogin.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Botão para abrir o modal -->
+    <hr class="my-8 border-gray-200 dark:border-gray-700">
+    <button onclick="openProfileModal()"
+        class="bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-bold py-2 px-6 rounded-lg transition-colors mb-8 shadow-lg hover:shadow-yellow-300/30">
+        <i class="fas fa-user-circle mr-2"></i> Ver Perfil Completo
+    </button>
+
+    <!-- Visualização normal do perfil -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden p-6 mb-8">
+        <div class="flex flex-col md:flex-row items-center gap-6">
+            <!-- Foto do perfil -->
+            <div class="relative group">
+                <img id="main-profile-img" src="{{ user.profile.get_profile_image_url }}?{% now 'U' %}"
+                    alt="Foto do perfil"
+                    class="w-32 h-32 rounded-full object-cover border-4 border-yellow-400 shadow-md profile-image">
+            </div>
+
+            <!-- Informações básicas -->
+            <div class="text-center md:text-left">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">{{ user.get_full_name }}</h2>
+                <p class="text-lg text-blue-500 dark:text-gray-400">
+                    {{ profile_data.role|default:"Sem cargo definido" }}
+                </p>
+                <!-- Data de entrada corrigida -->
+                <div class="flex items-center text-sm text-gray-500 dark:text-gray-300 mt-1">
+                    <i class="fas fa-calendar-alt mr-2"></i>
+                    <span>
+                        {% if profile_data.data_entrada %}
+                            Membro desde {{ profile_data.data_entrada|date:"d/m/Y" }}
+                        {% else %}
+                            Membro desde {{ profile_data.join_date|date:"d/m/Y" }}
+                        {% endif %}
+                    </span>
+                </div>
+
+                <div class="flex gap-3 mt-4 justify-center md:justify-start">
+                    <a href="{% url 'profile_edit' %}"
+                        class="bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors">
+                        <i class="fas fa-pencil-alt mr-2"></i> Editar
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Biografia (só mostra se existir) -->
+        {% if profile_data.bio %}
+        <div class="mt-6 bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Biografia</h3>
+            <p class="text-gray-600 dark:text-gray-300 whitespace-pre-line">{{ profile_data.bio }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Redes Sociais (só mostra se existir) -->
+    {% if profile_data.twitter or profile_data.linkedin %}
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden p-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Redes Sociais</h3>
+        <div class="flex flex-wrap gap-4">
+            {% if profile_data.twitter %}
+            <a href="https://twitter.com/{{ profile_data.twitter }}" target="_blank" rel="noopener noreferrer"
+                class="flex items-center text-gray-500 hover:text-blue-400 dark:hover:text-blue-300 transition-colors">
+                <i class="fab fa-twitter text-xl mr-2"></i>
+                <span>@{{ profile_data.twitter }}</span>
+            </a>
+            {% endif %}
+
+            {% if profile_data.linkedin %}
+            <a href="https://linkedin.com/in/{{ profile_data.linkedin }}" target="_blank" rel="noopener noreferrer"
+                class="flex items-center text-gray-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                <i class="fab fa-linkedin text-xl mr-2"></i>
+                <span>{{ profile_data.linkedin }}</span>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modal de visualização completa - Versão melhorada -->
+<div id="profile-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <!-- Backdrop com efeito de blur e transição suave -->
+    <div id="profile-modal-backdrop"
+        class="fixed inset-0 bg-black/50 backdrop-blur-md transition-opacity duration-300 ease-in-out opacity-0"></div>
+
+    <!-- Conteúdo do modal -->
+    <div id="profile-modal-content"
+        class="relative z-50 w-full max-w-md bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-xl transform transition-all duration-300 ease-out scale-95 opacity-0 overflow-hidden">
+
+        <!-- Cabeçalho com gradiente -->
+        <div class="bg-gradient-to-r from-yellow-400 to-yellow-500 dark:from-yellow-500 dark:to-yellow-600 p-4">
+            <div class="flex justify-between items-center">
+                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-900">Perfil Completo</h3>
+                <button data-close-profile-modal
+                    class="text-gray-800 hover:text-gray-900 transition-colors focus:outline-none">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Corpo do modal -->
+        <div class="p-6">
+            <!-- Foto e informações principais -->
+            <div class="flex flex-col items-center text-center mb-6">
+                <div class="relative group mb-4">
+                    <img id="modal-profile-img" src="{{ user.profile.get_profile_image_url }}" alt="Foto do perfil"
+                        class="w-28 h-28 rounded-full object-cover border-4 border-white dark:border-gray-800 shadow-lg">
+                </div>
+
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">{{ user.get_full_name }}</h2>
+                <p class="text-lg text-blue-500 dark:text-gray-400">
+                    {{ profile_data.role|default:"Sem cargo definido" }}
+                </p>
+                <!-- Data de entrada no modal -->
+                <div class="flex items-center text-sm text-gray-500 dark:text-gray-300 mt-1">
+                    <i class="fas fa-calendar-alt mr-2"></i>
+                    <span>
+                        {% if profile_data.data_entrada %}
+                            Membro desde {{ profile_data.data_entrada|date:"d/m/Y" }}
+                        {% else %}
+                            Membro desde {{ profile_data.join_date|date:"d/m/Y" }}
+                        {% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Biografia -->
+            {% if profile_data.bio %}
+            <div class="mb-6">
+                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
+                    <i class="fas fa-user-edit mr-2 text-yellow-500"></i> Biografia
+                </h4>
+                <p
+                    class="text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 whitespace-pre-line">
+                    {{ profile_data.bio }}
+                </p>
+            </div>
+            {% endif %}
+
+            <!-- Redes Sociais -->
+            {% if profile_data.twitter or profile_data.linkedin %}
+            <div class="mb-6">
+                <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+                    <i class="fas fa-share-alt mr-2 text-yellow-500"></i> Redes Sociais
+                </h4>
+                <div class="flex justify-center gap-4">
+                    {% if profile_data.twitter %}
+                    <a href="https://twitter.com/{{ profile_data.twitter }}" target="_blank" rel="noopener noreferrer"
+                        class="flex items-center px-4 py-2 bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-300 rounded-full transition-colors">
+                        <i class="fab fa-twitter mr-2"></i> Twitter
+                    </a>
+                    {% endif %}
+
+                    {% if profile_data.linkedin %}
+                    <a href="https://linkedin.com/in/{{ profile_data.linkedin }}" target="_blank"
+                        rel="noopener noreferrer"
+                        class="flex items-center px-4 py-2 bg-blue-100 dark:bg-blue-900/30 hover:bg-blue-200 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-300 rounded-full transition-colors">
+                        <i class="fab fa-linkedin mr-2"></i> LinkedIn
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Botões de ação -->
+            <div class="flex justify-center gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <a href="{% url 'profile_edit' %}"
+                    class="flex-1 flex items-center justify-center bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-medium py-2 px-4 rounded-lg transition-colors shadow hover:shadow-md">
+                    <i class="fas fa-pencil-alt mr-2"></i> Editar
+                </a>
+                <button data-close-profile-modal
+                    class="flex-1 flex items-center justify-center bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    <i class="fas fa-times mr-2"></i> Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Funções para controle do modal
+        function openProfileModal() {
+            const modal = document.getElementById('profile-modal');
+            const backdrop = document.getElementById('profile-modal-backdrop');
+            const content = document.getElementById('profile-modal-content');
+
+            modal.classList.remove('hidden');
+            // Força recálculo de layout para ativar a animação
+            void modal.offsetWidth;
+
+            backdrop.classList.add('opacity-100');
+            content.classList.add('opacity-100', 'scale-100');
+
+            // Bloqueia scroll da página
+            document.body.style.overflow = 'hidden';
+
+            // Fechar com ESC
+            document.addEventListener('keydown', handleEscape);
+        }
+
+        function closeProfileModal() {
+            const backdrop = document.getElementById('profile-modal-backdrop');
+            const content = document.getElementById('profile-modal-content');
+
+            backdrop.classList.remove('opacity-100');
+            content.classList.remove('opacity-100', 'scale-100');
+
+            setTimeout(() => {
+                document.getElementById('profile-modal').classList.add('hidden');
+                // Restaura scroll da página
+                document.body.style.overflow = '';
+            }, 300);
+
+            // Remover listener do ESC
+            document.removeEventListener('keydown', handleEscape);
+        }
+
+        function handleEscape(e) {
+            if (e.key === 'Escape') {
+                closeProfileModal();
+            }
+        }
+
+        // Event listeners para fechar o modal
+        document.querySelectorAll('[data-close-profile-modal]').forEach(btn => {
+            btn.addEventListener('click', closeProfileModal);
+        });
+
+        // Fechar ao clicar no backdrop
+        document.getElementById('profile-modal-backdrop').addEventListener('click', closeProfileModal);
+
+        // Tornar a função acessível globalmente
+        window.openProfileModal = openProfileModal;
+    });
+</script>
+
+<style>
+    /* Adiciona transição suave para a imagem do perfil */
+    #modal-profile-img {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    #modal-profile-img:hover {
+        transform: scale(1.05);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Melhora a aparência dos links de redes sociais */
+    .social-link {
+        transition: all 0.2s ease;
+    }
+
+    .social-link:hover {
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,486 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Notícias & Devlog{% endblock %}
+
+{% block extra_head %}
+<style>
+    .animate-pulse-once {
+        animation: pulse-once 0.3s ease-in-out;
+    }
+    
+    @keyframes pulse-once {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+    }
+    
+    /* Estilos para interações */
+    .interaction-btn {
+        transition: all 0.2s ease;
+    }
+    
+    .interaction-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+    }
+    
+    .interaction-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="py-20 px-4 md:px-8">
+    <div class="max-w-6xl mx-auto">
+        <!-- Cabeçalho -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">Notícias & Devlog</h1>
+            <p class="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+                Fique por dentro das últimas atualizações, patches e novidades do nosso desenvolvimento
+            </p>
+            
+            {% if user.is_staff %}
+            <div class="mt-6">
+                <a href="{% url 'create_devlog_post' %}" 
+                   class="inline-flex items-center gap-2 bg-brand-purple text-white px-6 py-3 rounded-lg hover:bg-brand-purple/90 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Criar Nova Notícia
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Barra de busca e filtros -->
+        <div class="mb-8">
+            <!-- Busca -->
+            <form method="GET" action="{% url 'devlog' %}" class="relative mb-6">
+                <input type="search" 
+                       name="q"
+                       value="{{ request.GET.q }}"
+                       placeholder="Buscar por título ou conteúdo..."
+                       class="w-full p-4 pl-12 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-brand-yellow focus:outline-none">
+                <svg class="w-6 h-6 absolute top-1/2 left-4 -translate-y-1/2 text-gray-400"
+                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                </svg>
+                <button type="submit" class="absolute right-4 top-1/2 -translate-y-1/2 bg-brand-yellow text-black px-4 py-2 rounded-md hover:bg-brand-yellow/90">
+                    Buscar
+                </button>
+            </form>
+
+            <!-- Filtros -->
+            <div class="flex flex-wrap justify-center gap-4 mb-8">
+                <a href="{% url 'devlog' %}"
+                    class="{% if not current_category %}bg-brand-yellow text-black{% else %}bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200{% endif %} font-bold py-2 px-4 rounded-lg hover:bg-brand-yellow/90 transition-all">
+                    Ver Tudo
+                </a>
+                
+                {% for category in categories %}
+                <a href="{% url 'devlog' %}?categoria={{ category.slug }}"
+                    class="{% if current_category == category.slug %}bg-brand-yellow text-black{% else %}bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200{% endif %} font-bold py-2 px-4 rounded-lg hover:bg-brand-yellow/90 transition-all"
+                    style="{% if current_category == category.slug %}background-color: {{ category.color }} !important;{% endif %}">
+                    {{ category.name }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Lista de Posts -->
+        <div class="space-y-8" id="posts-container">
+            {% if posts %}
+                {% for post in posts %}
+                <div class="post-card bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg dark:hover:shadow-gray-700/50"
+                    data-category="{{ post.category.slug }}"
+                    id="post-{{ post.id }}"
+                    data-search="{{ post.title|lower }} {{ post.excerpt|lower }} {{ post.content|lower }}">
+                    
+                    <!-- Imagem do Post -->
+                    {% if post.featured_image %}
+                    <img src="{{ post.featured_image.url }}" alt="{{ post.title }}" class="w-full h-64 object-cover">
+                    {% else %}
+                    <div class="w-full h-64 bg-gradient-to-r from-purple-500 to-yellow-500 flex items-center justify-center">
+                        <span class="text-white text-xl font-bold">{{ post.category.name }}</span>
+                    </div>
+                    {% endif %}
+
+                    <div class="p-6">
+                        <!-- Categoria -->
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-sm font-bold" style="color: {{ post.category.color }}">
+                                {{ post.category.name|upper }}
+                            </span>
+                            {% if user.is_staff %}
+                            <a href="{% url 'edit_devlog_post' post.slug %}" 
+                               class="text-xs bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600">
+                                Editar
+                            </a>
+                            {% endif %}
+                        </div>
+
+                        <!-- Título -->
+                        <h3 class="text-2xl font-bold mt-1">
+                            <a href="{% url 'devlog_post_detail' post.slug %}" class="hover:text-brand-yellow transition-colors">
+                                {{ post.title }}
+                            </a>
+                        </h3>
+
+                        <!-- Data e Autor -->
+                        <p class="text-sm text-gray-500 mb-4">
+                            {{ post.published_at|date:"d/m/Y" }} • Por {{ post.author.get_full_name }}
+                            {% if post.view_count > 0 %}
+                            • 👁️ {{ post.view_count }} visualizações
+                            {% endif %}
+                        </p>
+
+                        <!-- Resumo -->
+                        <p class="text-gray-600 dark:text-gray-300 mb-6">{{ post.excerpt }}</p>
+
+                        <!-- Botões de Interação -->
+                        <div class="flex flex-wrap items-center gap-4 text-gray-500 dark:text-gray-400">
+                            <!-- Curtir -->
+                            <button class="like-btn interaction-btn flex items-center gap-2 hover:text-brand-yellow transition-colors {% if post.user_has_liked %}text-brand-yellow{% endif %}"
+                                    data-post-id="{{ post.id }}"
+                                    {% if not user.is_authenticated %}disabled title="Faça login para curtir"{% endif %}>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6"
+                                    {% if post.user_has_liked %}fill="currentColor"{% else %}fill="none"{% endif %}
+                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                </svg>
+                                <span class="like-count">{{ post.likes_count }}</span>
+                            </button>
+
+                            <!-- Comentar -->
+                            <button class="comment-btn interaction-btn flex items-center gap-2 hover:text-brand-yellow transition-colors"
+                                    data-post-id="{{ post.id }}"
+                                    {% if not user.is_authenticated %}disabled title="Faça login para comentar"{% endif %}>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                </svg>
+                                <span class="comment-count">{{ post.comments_count }}</span>
+                            </button>
+
+                            <!-- Compartilhar -->
+                            <button class="share-btn interaction-btn flex items-center gap-2 hover:text-brand-yellow transition-colors"
+                                    data-post-id="{{ post.id }}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M8.684 13.342C8.886 12.938 9 12.482 9 12s-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                                </svg>
+                                <span>Compartilhar</span>
+                            </button>
+
+                            <!-- Ler Mais -->
+                            <a href="{% url 'devlog_post_detail' post.slug %}"
+                               class="ml-auto text-brand-yellow hover:text-brand-yellow/80 font-medium">
+                                Ler mais →
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-12">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h3 class="text-xl font-semibold mb-2">Nenhuma notícia encontrada</h3>
+                    <p class="text-gray-600 dark:text-gray-400">
+                        {% if request.GET.q %}
+                        Não encontramos resultados para "{{ request.GET.q }}"
+                        {% else %}
+                        Ainda não há notícias publicadas.
+                        {% endif %}
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Paginação -->
+        {% if posts.has_other_pages %}
+        <div class="mt-12 flex justify-center">
+            <nav class="flex items-center gap-2">
+                {% if posts.has_previous %}
+                <a href="?page={{ posts.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if current_category %}&categoria={{ current_category }}{% endif %}"
+                   class="px-4 py-2 border rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                    ← Anterior
+                </a>
+                {% endif %}
+
+                {% for num in posts.paginator.page_range %}
+                    {% if posts.number == num %}
+                    <span class="px-4 py-2 bg-brand-yellow text-black rounded-lg">{{ num }}</span>
+                    {% elif num > posts.number|add:'-3' and num < posts.number|add:'3' %}
+                    <a href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if current_category %}&categoria={{ current_category }}{% endif %}"
+                       class="px-4 py-2 border rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                        {{ num }}
+                    </a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if posts.has_next %}
+                <a href="?page={{ posts.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if current_category %}&categoria={{ current_category }}{% endif %}"
+                   class="px-4 py-2 border rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                    Próxima →
+                </a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('=== NOTÍCIAS PAGE LOADED ===');
+    
+    // ===== FUNÇÕES AUXILIARES =====
+    function getCsrfToken() {
+        // Tenta obter do meta tag
+        const metaToken = document.querySelector('meta[name="csrf-token"]');
+        if (metaToken) {
+            return metaToken.getAttribute('content');
+        }
+        
+        // Tenta obter do input hidden
+        const csrfInput = document.querySelector('[name="csrfmiddlewaretoken"]');
+        if (csrfInput && csrfInput.value) {
+            return csrfInput.value;
+        }
+        
+        // Tenta obter do cookie
+        const name = 'csrftoken';
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        
+        return cookieValue || '';
+    }
+    
+    function showNotification(message, type = 'info') {
+        // Remove notificações anteriores
+        document.querySelectorAll('.global-notification').forEach(el => el.remove());
+        
+        const notification = document.createElement('div');
+        notification.className = `global-notification fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg transform transition-all duration-300 ${
+            type === 'success' ? 'bg-green-500 text-white' : 
+            type === 'error' ? 'bg-red-500 text-white' : 
+            'bg-blue-500 text-white'
+        }`;
+        notification.textContent = message;
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateX(100px)';
+        
+        document.body.appendChild(notification);
+        
+        // Animar entrada
+        setTimeout(() => {
+            notification.style.opacity = '1';
+            notification.style.transform = 'translateX(0)';
+        }, 10);
+        
+        // Remover após 3 segundos
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            notification.style.transform = 'translateX(100px)';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+    
+    const csrfToken = getCsrfToken();
+    console.log('CSRF Token disponível:', csrfToken ? 'Sim' : 'Não');
+    
+    // ===== FUNÇÕES DE INTERAÇÃO =====
+    
+    // 1. CURTIR POST
+    document.querySelectorAll('.like-btn').forEach(btn => {
+        btn.addEventListener('click', async function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            console.log('=== LIKE BUTTON CLICKED ===');
+            
+            if (this.disabled) {
+                showNotification('Faça login para curtir notícias', 'error');
+                return;
+            }
+            
+            const postId = this.dataset.postId;
+            console.log(`Post ID: ${postId}`);
+            
+            if (!postId) {
+                showNotification('Erro: Post não identificado', 'error');
+                return;
+            }
+            
+            const likeIcon = this.querySelector('svg');
+            const likeCount = this.querySelector('.like-count');
+            
+            // Efeito visual imediato
+            this.classList.add('animate-pulse-once');
+            
+            try {
+                console.log(`Enviando like para post ${postId}...`);
+                
+                // CORREÇÃO: Usar a URL correta com 'api/'
+                const response = await fetch(`/api/post/${postId}/like/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `csrfmiddlewaretoken=${encodeURIComponent(csrfToken)}`
+                });
+                
+                console.log(`Resposta recebida: ${response.status}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Dados da resposta:', data);
+                
+                if (data.status === 'success') {
+                    const isLiked = data.liked;
+                    
+                    if (isLiked) {
+                        likeIcon.setAttribute('fill', 'currentColor');
+                        this.classList.add('text-brand-yellow');
+                        showNotification('Notícia curtida! ✨', 'success');
+                    } else {
+                        likeIcon.setAttribute('fill', 'none');
+                        this.classList.remove('text-brand-yellow');
+                        showNotification('Curtida removida', 'info');
+                    }
+                    
+                    if (likeCount) {
+                        likeCount.textContent = data.likes_count;
+                    }
+                } else {
+                    showNotification(data.message || 'Erro ao curtir', 'error');
+                }
+            } catch (error) {
+                console.error('Erro detalhado ao curtir:', error);
+                showNotification('Erro ao processar a curtida. Tente novamente.', 'error');
+            } finally {
+                setTimeout(() => this.classList.remove('animate-pulse-once'), 300);
+            }
+        });
+    });
+
+    // 2. COMPARTILHAR POST
+    document.querySelectorAll('.share-btn').forEach(btn => {
+        btn.addEventListener('click', async function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            console.log('=== SHARE BUTTON CLICKED ===');
+            
+            const postId = this.dataset.postId;
+            console.log(`Post ID para compartilhar: ${postId}`);
+            
+            if (!postId) {
+                showNotification('Erro: Post não identificado', 'error');
+                return;
+            }
+            
+            try {
+                console.log(`Solicitando URL de compartilhamento para post ${postId}...`);
+                
+                // CORREÇÃO: Usar a URL correta com 'api/'
+                const response = await fetch(`/api/post/${postId}/share/`);
+                console.log(`Resposta recebida: ${response.status}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                console.log('Dados da resposta:', data);
+                
+                if (data.status === 'success') {
+                    const shareUrl = data.url;
+                    
+                    // Verificar se o navegador suporta Web Share API
+                    if (navigator.share) {
+                        try {
+                            await navigator.share({
+                                title: data.title || 'Confira esta notícia',
+                                text: data.message || '',
+                                url: shareUrl,
+                            });
+                            console.log('Compartilhado via Web Share API');
+                            showNotification('Compartilhado com sucesso!', 'success');
+                        } catch (error) {
+                            if (error.name !== 'AbortError') {
+                                console.log('Fallback para copiar link');
+                                // Fallback para copiar link
+                                await navigator.clipboard.writeText(shareUrl);
+                                showNotification('📋 Link copiado para a área de transferência!', 'success');
+                            }
+                        }
+                    } else {
+                        // Fallback para navegadores sem Web Share API
+                        console.log('Usando fallback de cópia');
+                        await navigator.clipboard.writeText(shareUrl);
+                        showNotification('📋 Link copiado para a área de transferência!', 'success');
+                    }
+                } else {
+                    showNotification(data.message || 'Erro ao compartilhar', 'error');
+                }
+            } catch (error) {
+                console.error('Erro detalhado ao compartilhar:', error);
+                showNotification('Erro ao compartilhar. Tente copiar o link manualmente.', 'error');
+            }
+        });
+    });
+
+    // 3. COMENTAR (simplificado - apenas abre a página de detalhe)
+    document.querySelectorAll('.comment-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            console.log('=== COMMENT BUTTON CLICKED ===');
+            
+            if (this.disabled) {
+                showNotification('Faça login para comentar', 'error');
+                return;
+            }
+            
+            const postId = this.dataset.postId;
+            const postCard = document.querySelector(`#post-${postId}`);
+            
+            if (postCard) {
+                const postLink = postCard.querySelector('h3 a');
+                if (postLink) {
+                    window.location.href = postLink.href + '#comments-section';
+                }
+            }
+        });
+    });
+    
+    console.log('=== NOTÍCIAS PAGE SCRIPT LOADED SUCCESSFULLY ===');
+});
+</script>
+{% endblock %}

@@ -1,0 +1,138 @@
+.modal-scrollbar::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-scrollbar::-webkit-scrollbar-track {
+    background: #2d3748;
+}
+
+.modal-scrollbar::-webkit-scrollbar-thumb {
+    background: #facc15;
+    border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+    body {
+        padding-left: 0;
+        padding-bottom: 4rem;
+    }
+}
+
+/* Animação do nome da empresa */
+@keyframes slideInFromLeft {
+    0% {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Animação do modal */
+@keyframes modalSlideDown {
+    0% {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+.company-name {
+    animation: slideInFromLeft 1.5s ease-out forwards;
+    opacity: 0;
+}
+
+.modal-animation {
+    animation: modalSlideDown 0.5s ease-out forwards;
+}
+
+.learn-more-btn {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    background-color: #6d28d9;
+    color: white;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.dark .learn-more-btn {
+    background-color: #facc15;
+    color: black;
+}
+
+.learn-more-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos para os modais */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    padding: 1rem;
+}
+
+.modal-container {
+    background: white;
+    border-radius: 0.5rem;
+    max-width: 90vw;
+    max-height: 90vh;
+    overflow: hidden;
+    position: relative;
+}
+
+.dark .modal-container {
+    background: #1f2937;
+}
+
+.modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    z-index: 10;
+}
+
+/* Animações para elementos com data-animate */
+.animate-fade-in-up {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+}

@@ -1,0 +1,22 @@
+
+
+ /* Backdrop com blur */
+ .backdrop-blur {
+     opacity: 0;
+     backdrop-filter: blur(0px);
+     transition: opacity 0.3s ease-out, backdrop-filter 0.3s ease-out;
+ }
+
+ .backdrop-blur.show {
+     opacity: 1;
+     backdrop-filter: blur(8px);
+ }
+
+ /* Melhorando a transição dos ícones */
+ #main-nav .w-6.h-6 {
+     width: 1.75rem;
+     height: 1.75rem;
+     transition: all 0.2s ease;
+ }
+
+ 

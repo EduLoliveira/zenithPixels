@@ -1,0 +1,47 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Zenith Pixels Studio{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-purple': '#6d28d9',
+                        'brand-blue': '#2563eb',
+                        'brand-yellow': '#facc15',
+                        'dark-bg': '#111827',
+                        'light-bg': '#f9fafb',
+                    }
+                }
+            }
+        }
+    </script>
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="bg-light-bg dark:bg-dark-bg text-gray-800 dark:text-gray-200 transition-colors duration-300">
+
+    {% include 'components/headerTop.html' with nav_items=nav_items %}
+
+    <main class="w-full">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% include 'components/footer.html' %}
+    {% include 'components/modals.html' %}
+    <script src="{% static 'js/theme.js' %}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

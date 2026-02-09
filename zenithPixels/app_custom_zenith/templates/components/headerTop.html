@@ -1,0 +1,18 @@
+<header class="fixed top-0 left-0 right-0 bg-white dark:bg-gray-900 shadow-md z-40">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+        <a href="{% url 'home' %}" class="text-xl font-bold text-purple-600 dark:text-yellow-400">
+            Zenith Pixels
+        </a>
+        
+        <div class="flex items-center space-x-4">
+            {% for item in nav_items.utility %}
+                <a href="{{ item.url }}" 
+                   class="p-2 rounded-full hover:bg-purple-100 dark:hover:bg-gray-700"
+                   {% if item.id %}id="{{ item.id }}"{% endif %}>
+                    {{ item.icon|safe }}
+                    <span class="sr-only">{{ item.name }}</span>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+</header>

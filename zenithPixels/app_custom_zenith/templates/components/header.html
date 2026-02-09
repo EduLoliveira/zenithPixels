@@ -1,0 +1,160 @@
+<style>
+    .mobile-menu {
+        opacity: 0;
+        max-height: 0;
+        transition: all 0.3s ease-in-out;
+        z-index: 40;
+    }
+
+    .mobile-menu[aria-expanded="true"] {
+        opacity: 1;
+        max-height: 500px;
+        overflow: visible;
+    }
+</style>
+<header class="mobile-header fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-800 shadow-md md:hidden">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+        <a href="{% url 'home' %}"
+            class="text-xl font-bold text-purple-600 dark:text-yellow-400 hover:opacity-80 transition-opacity">
+            Zenith Pixels
+        </a>
+
+        <button id="mobile-menu-button"
+            class="p-2 focus:outline-none focus:ring-2 focus:ring-purple-500 dark:focus:ring-yellow-400 rounded-md"
+            aria-label="Abrir menu" aria-expanded="false" aria-controls="mobile-menu">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800 dark:text-gray-200" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
+    </div>
+
+    <!-- Menu Mobile -->
+   <div id="mobile-menu"
+     class="mobile-menu absolute top-full left-0 right-0 bg-white dark:bg-gray-800 shadow-lg border-t border-gray-100 dark:border-gray-700 transform origin-top transition-all duration-300 ease-in-out max-h-0 overflow-hidden opacity-0">
+        <nav class="flex flex-col p-2 space-y-1" aria-label="Menu principal">
+            <!-- Itens Principais -->
+            {% for item in nav_items.main %}
+            <a href="{{ item.url }}"
+                class="flex items-center px-4 py-3 rounded-lg hover:bg-purple-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                <span class="flex-shrink-0">
+                    {{ item.icon|safe }}
+                </span>
+                <span class="ml-3 font-medium text-gray-800 dark:text-gray-200">{{ item.name }}</span>
+            </a>
+            {% endfor %}
+
+            <!-- Divider -->
+            <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+
+            <!-- Itens Utilitários -->
+            {% for item in nav_items.utility %}
+            {% if item.id == 'theme-toggle' %}
+            <button id="theme-toggle-mobile"
+                class="w-full flex items-center px-4 py-3 rounded-lg hover:bg-purple-50 dark:hover:bg-gray-700 transition-colors duration-200 text-left"
+                aria-label="Alternar tema">
+                <span class="flex-shrink-0">
+                    {{ item.icon|safe }}
+                </span>
+                <span class="ml-3 font-medium text-gray-800 dark:text-gray-200">{{ item.name }}</span>
+            </button>
+            {% elif item.modal %}
+            <button data-open-profile-modal
+                class="w-full flex items-center px-4 py-3 rounded-lg hover:bg-purple-50 dark:hover:bg-gray-700 transition-colors duration-200 text-left">
+                <span class="flex-shrink-0">
+                    {{ item.icon|safe }}
+                </span>
+                <span class="ml-3 font-medium text-gray-800 dark:text-gray-200">{{ item.name }}</span>
+            </button>
+            {% else %}
+            <a href="{{ item.url }}"
+                class="flex items-center px-4 py-3 rounded-lg hover:bg-purple-50 dark:hover:bg-gray-700 transition-colors duration-200">
+                <span class="flex-shrink-0">
+                    {{ item.icon|safe }}
+                </span>
+                <span class="ml-3 font-medium text-gray-800 dark:text-gray-200">{{ item.name }}</span>
+            </a>
+            {% endif %}
+            {% endfor %}
+        </nav>
+    </div>
+</header>
+
+<!-- Navbar Lateral Desktop -->
+<nav id="main-nav"
+    class="group fixed top-1/2 left-0 -translate-y-1/2 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border-r border-gray-200 dark:border-gray-700 rounded-r-xl shadow-lg transition-all duration-300 ease-in-out hover:w-48 w-16 p-2 md:block hidden"
+    aria-label="Navegação principal">
+    <ul class="flex flex-col h-full space-y-2">
+        <!-- Itens Principais -->
+        <div class="flex-grow space-y-2">
+            {% for item in nav_items.main %}
+            <li>
+                <a href="{{ item.url }}"
+                    class="flex items-center space-x-3 p-3 rounded-lg hover:bg-purple-50/50 dark:hover:bg-gray-700/50 transition-colors duration-200 group"
+                    aria-label="{{ item.name }}">
+                    <span
+                        class="flex-shrink-0 text-purple-600 dark:text-yellow-400 group-hover:text-purple-700 dark:group-hover:text-yellow-300">
+                        {{ item.icon|safe }}
+                    </span>
+                    <span
+                        class="font-medium text-gray-800 dark:text-gray-200 hidden group-hover:inline whitespace-nowrap overflow-hidden">
+                        {{ item.name }}
+                    </span>
+                </a>
+            </li>
+            {% endfor %}
+        </div>
+
+        <!-- Divider -->
+        <div class="border-t border-gray-200 dark:border-gray-700 my-1"></div>
+
+        <!-- Itens Utilitários -->
+        <div class="space-y-2 mt-auto">
+            {% for item in nav_items.utility %}
+            <li>
+                {% if item.id == 'theme-toggle' %}
+                <button id="{{ item.id }}"
+                    class="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-purple-50/50 dark:hover:bg-gray-700/50 transition-colors duration-200 group"
+                    aria-label="{{ item.name }}">
+                    <span
+                        class="flex-shrink-0 text-purple-600 dark:text-yellow-400 group-hover:text-purple-700 dark:group-hover:text-yellow-300">
+                        {{ item.icon|safe }}
+                    </span>
+                    <span
+                        class="font-medium text-gray-800 dark:text-gray-200 hidden group-hover:inline whitespace-nowrap overflow-hidden">
+                        {{ item.name }}
+                    </span>
+                </button>
+                {% elif item.modal %}
+                <button data-open-profile-modal
+                    class="w-full flex items-center space-x-3 p-3 rounded-lg hover:bg-purple-50/50 dark:hover:bg-gray-700/50 transition-colors duration-200 group"
+                    aria-label="{{ item.name }}">
+                    <span
+                        class="flex-shrink-0 text-purple-600 dark:text-yellow-400 group-hover:text-purple-700 dark:group-hover:text-yellow-300">
+                        {{ item.icon|safe }}
+                    </span>
+                    <span
+                        class="font-medium text-gray-800 dark:text-gray-200 hidden group-hover:inline whitespace-nowrap overflow-hidden">
+                        {{ item.name }}
+                    </span>
+                </button>
+                {% else %}
+                <a href="{{ item.url }}"
+                    class="flex items-center space-x-3 p-3 rounded-lg hover:bg-purple-50/50 dark:hover:bg-gray-700/50 transition-colors duration-200 group"
+                    aria-label="{{ item.name }}">
+                    <span
+                        class="flex-shrink-0 text-purple-600 dark:text-yellow-400 group-hover:text-purple-700 dark:group-hover:text-yellow-300">
+                        {{ item.icon|safe }}
+                    </span>
+                    <span
+                        class="font-medium text-gray-800 dark:text-gray-200 hidden group-hover:inline whitespace-nowrap overflow-hidden">
+                        {{ item.name }}
+                    </span>
+                </a>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </div>
+    </ul>
+</nav>
+
