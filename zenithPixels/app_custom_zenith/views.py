@@ -975,84 +975,122 @@ def lilith_view(request):
     return render(request, 'gamepage/lilith.html')
 
 def lore_portal(request, fragment_id=1):
-    # Simulação de Banco de Dados dos Fragmentos
-    # AGORA TODOS ESTÃO COMO 'unlocked'
+    # --- 1. BANCO DE DADOS (TODOS OS ITENS DESBLOQUEADOS) ---
     fragments_db = [
-        {
-            'id': 1,
-            'title': "A Origem da Chama",
-            'type': "Templo Ancestral",
-            'status': 'unlocked',
-            'content': "Há milênios, quando as estrelas ainda dançavam em harmonia com a terra, nasceu a Chama Espiral. Não era apenas fogo, mas a própria essência do conhecimento cósmico, capturada em uma dança eterna de luz e energia. Os Antigos, sábios que dominavam as artes arcanas, descobriram que esta chama não queimava - ela revelava.",
-            'reflection': "Este fragmento revela camadas profundas da história da Chama Espiral. Continue explorando para descobrir como todos os fragmentos se conectam.",
-            'pos_top': 45, 'pos_left': 20,
-            'is_active': False
-        },
-        {
-            'id': 2,
-            'title': "Os Guardiões Perdidos",
-            'type': "Ruínas",
-            'status': 'unlocked',
-            'content': "Os primeiros a tocar a chama não foram queimados, mas transformados. Eles se tornaram os Guardiões, seres de pura energia cinética que juraram proteger o núcleo do templo. Com o tempo, sua humanidade se dissipou, restando apenas o dever eterno.",
-            'reflection': "Os Guardiões deixaram para trás mecanismos que só respondem à frequência correta da chama, sugerindo que a tecnologia e a magia eram uma só.",
-            'pos_top': 30, 'pos_left': 50,
-            'is_active': False
-        },
-        {
-            'id': 3,
-            'title': "O Grande Eclipse",
-            'type': "Evento Histórico",
-            'status': 'unlocked', # Desbloqueado
-            'content': "Durante o Grande Eclipse, a Chama Espiral oscilou pela primeira vez. Os registros indicam que uma sombra externa tentou drenar sua energia, fragmentando a realidade em múltiplos planos temporais. Foi neste momento que as ruínas se tornaram um labirinto.",
-            'reflection': "O eclipse não foi um evento natural, mas uma consequência da tentativa de controlar a chama sem o devido respeito.",
-            'pos_top': 55, 'pos_left': 70,
-            'is_active': False
-        },
-        {
-            'id': 4,
-            'title': "Fragmentos do Tempo",
-            'type': "Teoria",
-            'status': 'unlocked', # Desbloqueado
-            'content': "A realidade neste local não é linear. O passado, presente e futuro coexistem em camadas sobrepostas. A Chama Espiral atua como uma âncora, impedindo que essas camadas colapsem umas sobre as outras.",
-            'reflection': "Manipular a chama permite viajar brevemente entre essas camadas, resolvendo problemas do presente com soluções do passado.",
-            'pos_top': 70, 'pos_left': 40,
-            'is_active': False
-        },
-        {
-            'id': 5,
-            'title': "O Fim do Ciclo",
-            'type': "Profecia",
-            'status': 'unlocked', # Desbloqueado
-            'content': "A profecia final diz que um viajante virá não para dominar a chama, mas para libertá-la. Ao fazer isso, o ciclo de guarda eterna terminará, e o conhecimento contido na espiral retornará às estrelas.",
-            'reflection': "Você sente que seus passos no templo já foram previstos há muito tempo. O fim da jornada está próximo.",
-            'pos_top': 85, 'pos_left': 60,
-            'is_active': False
-        },
+        # --- LORE ---
+        {'id': 1, 'category': 'lore', 'subcategory': 'historia', 'title': "A Origem da Chama", 'type': "Lore / História", 'status': 'unlocked', 'content': "Há milênios, quando as estrelas ainda dançavam em harmonia com a terra, nasceu a Chama Espiral. Não era apenas fogo, mas a própria essência do conhecimento cósmico...", 'related_ids': [10]},
+        {'id': 2, 'category': 'lore', 'subcategory': 'eventos', 'title': "O Grande Eclipse", 'type': "Lore / Eventos", 'status': 'unlocked', 'content': "Durante o Grande Eclipse, a Chama Espiral oscilou pela primeira vez...", 'related_ids': [1]},
+        {'id': 3, 'category': 'lore', 'subcategory': 'cronologia', 'title': "Linha do Tempo Alpha", 'type': "Lore / Cronologia", 'status': 'unlocked', 'content': "Registro temporal da primeira era...", 'related_ids': []},
+
+        # --- PERSONAGENS ---
+        {'id': 10, 'category': 'personagens', 'subcategory': 'guardioes', 'title': "Os Guardiões Ancestrais", 'type': "Personagens / Guardiões", 'status': 'unlocked', 'content': "Os primeiros a tocar a chama não foram queimados, mas transformados...", 'related_ids': [20]},
+        {'id': 11, 'category': 'personagens', 'subcategory': 'lideres', 'title': "Rei Kaelthas", 'type': "Personagens / Líderes", 'status': 'unlocked', 'content': "O último rei a unir as tribos sob a luz da Chama...", 'related_ids': []},
+        {'id': 12, 'category': 'personagens', 'subcategory': 'entidades', 'title': "O Observador", 'type': "Personagens / Entidades", 'status': 'unlocked', 'content': "Uma entidade que existe apenas nos reflexos dos espelhos do templo...", 'related_ids': []},
+
+        # --- LOCAIS ---
+        {'id': 20, 'category': 'locais', 'subcategory': 'templos', 'title': "Templo Ancestral", 'type': "Locais / Templos", 'status': 'unlocked', 'content': "No coração da montanha sagrada, o Templo Ancestral foi erguido...", 'related_ids': [1, 10]},
+        {'id': 21, 'category': 'locais', 'subcategory': 'ruinas', 'title': "Ruínas Esquecidas", 'type': "Locais / Ruínas", 'status': 'unlocked', 'content': "Antigas estruturas que precedem até mesmo a Chama...", 'related_ids': []},
+        {'id': 22, 'category': 'locais', 'subcategory': 'santuarios', 'title': "Santuário da Luz", 'type': "Locais / Santuários", 'status': 'unlocked', 'content': "Um local de cura e meditação...", 'related_ids': []},
+
+        # --- ARTEFATOS ---
+        {'id': 30, 'category': 'artefatos', 'subcategory': 'reliquias', 'title': "Cálice de Fogo", 'type': "Artefatos / Relíquias", 'status': 'unlocked', 'content': "O cálice usado para transportar brasas da chama original...", 'related_ids': []},
+        {'id': 31, 'category': 'artefatos', 'subcategory': 'fragmentos', 'title': "Fragmento Estelar", 'type': "Artefatos / Fragmentos", 'status': 'unlocked', 'content': "Um pedaço de estrela solidificado...", 'related_ids': []},
+
+        # --- GALERIA ---
+        {'id': 40, 'category': 'galeria', 'subcategory': 'concept_art', 'title': "Concept: Templo", 'type': "Galeria / Concept Art", 'status': 'unlocked', 'content': "Esboços originais da arquitetura do templo...", 'related_ids': []},
+        {'id': 41, 'category': 'galeria', 'subcategory': 'ilustracoes', 'title': "Batalha Final", 'type': "Galeria / Ilustrações", 'status': 'unlocked', 'content': "Representação artística da grande guerra...", 'related_ids': []},
+
+        # --- PUZZLES ---
+        {'id': 50, 'category': 'puzzles', 'subcategory': 'facil', 'title': "Enigma da Porta", 'type': "Puzzles / Fácil", 'status': 'unlocked', 'content': "Fale 'amigo' e entre...", 'related_ids': []},
+        {'id': 51, 'category': 'puzzles', 'subcategory': 'medio', 'title': "Torres de Hanoi", 'type': "Puzzles / Médio", 'status': 'unlocked', 'content': "Mova os discos sem colocar um maior sobre um menor...", 'related_ids': []},
+        {'id': 52, 'category': 'puzzles', 'subcategory': 'dificil', 'title': "Cubo do Tempo", 'type': "Puzzles / Difícil", 'status': 'unlocked', 'content': "Alinhe as faces em quatro dimensões...", 'related_ids': []},
+
+        # --- EXTRAS ---
+        {'id': 60, 'category': 'extras', 'subcategory': 'curiosidades', 'title': "Easter Egg #1", 'type': "Extras / Curiosidades", 'status': 'unlocked', 'content': "Os desenvolvedores esconderam suas iniciais nas estrelas...", 'related_ids': []},
+        {'id': 61, 'category': 'extras', 'subcategory': 'referencias', 'title': "Inspirações", 'type': "Extras / Referências", 'status': 'unlocked', 'content': "Baseado em mitologias antigas...", 'related_ids': []},
     ]
 
-    # Lógica de Seleção (Mantém a mesma lógica robusta)
-    selected_fragment = next((f for f in fragments_db if f['id'] == fragment_id), fragments_db[0])
-    
-    # Marcar ativo para o template pintar de azul brilhante
-    for f in fragments_db:
-        if f['id'] == selected_fragment['id']:
-            f['is_active'] = True
+    # --- 2. LÓGICA DE SELEÇÃO ---
+    try:
+        selected_item = next((f for f in fragments_db if f['id'] == int(fragment_id)), fragments_db[0])
+    except:
+        selected_item = fragments_db[0]
 
-    # Cálculos de Progresso (Agora será 100% ou 5/5)
-    total = len(fragments_db)
-    unlocked = len([f for f in fragments_db if f['status'] == 'unlocked'])
-    progress_percentage = (unlocked / total) * 100
+    # --- 3. HELPER DE LINKS ---
+    def get_first_id(cat, subcat=None):
+        found = next((f for f in fragments_db if f['category'] == cat and (subcat is None or f['subcategory'] == subcat)), None)
+        return found['id'] if found else 1
+
+    # --- 4. LINKS DE NAVEGAÇÃO ---
+    nav_links = {
+        'lore_historia': get_first_id('lore', 'historia'),
+        'lore_eventos': get_first_id('lore', 'eventos'),
+        'lore_cronologia': get_first_id('lore', 'cronologia'),
+        'personagens_guardioes': get_first_id('personagens', 'guardioes'),
+        'personagens_lideres': get_first_id('personagens', 'lideres'),
+        'personagens_entidades': get_first_id('personagens', 'entidades'),
+        'locais_templos': get_first_id('locais', 'templos'),
+        'locais_ruinas': get_first_id('locais', 'ruinas'),
+        'locais_santuarios': get_first_id('locais', 'santuarios'),
+        'artefatos_reliquias': get_first_id('artefatos', 'reliquias'),
+        'artefatos_fragmentos': get_first_id('artefatos', 'fragmentos'),
+        'galeria_concept': get_first_id('galeria', 'concept_art'),
+        'galeria_ilustracoes': get_first_id('galeria', 'ilustracoes'),
+        'puzzles_facil': get_first_id('puzzles', 'facil'),
+        'puzzles_medio': get_first_id('puzzles', 'medio'),
+        'puzzles_dificil': get_first_id('puzzles', 'dificil'),
+        'extras_curiosidades': get_first_id('extras', 'curiosidades'),
+        'extras_referencias': get_first_id('extras', 'referencias'),
+    }
+
+    # --- 5. LINKS PRINCIPAIS ---
+    main_category_links = {
+        'lore': nav_links['lore_historia'],
+        'personagens': nav_links['personagens_guardioes'],
+        'locais': nav_links['locais_templos'],
+        'artefatos': nav_links['artefatos_reliquias'],
+        'galeria': nav_links['galeria_concept'],
+        'puzzles': nav_links['puzzles_facil'],
+        'extras': nav_links['extras_curiosidades'],
+    }
+
+    # --- 6. FILTRO DA LISTA DO MEIO ---
+    current_list_items = [
+        f for f in fragments_db 
+        if f['category'] == selected_item['category'] and f['subcategory'] == selected_item['subcategory']
+    ]
+
+    # --- 7. CONTAGENS ---
+    def count_sub(cat, sub):
+        return len([f for f in fragments_db if f['category'] == cat and f['subcategory'] == sub])
+
+    counts = {
+        'historia': count_sub('lore', 'historia'), 'eventos': count_sub('lore', 'eventos'), 'cronologia': count_sub('lore', 'cronologia'),
+        'guardioes': count_sub('personagens', 'guardioes'), 'lideres': count_sub('personagens', 'lideres'), 'entidades': count_sub('personagens', 'entidades'),
+        'templos': count_sub('locais', 'templos'), 'ruinas': count_sub('locais', 'ruinas'), 'santuarios': count_sub('locais', 'santuarios'),
+        'reliquias': count_sub('artefatos', 'reliquias'), 'fragmentos': count_sub('artefatos', 'fragmentos'),
+        'concept': count_sub('galeria', 'concept_art'), 'ilustracoes': count_sub('galeria', 'ilustracoes'),
+        'facil': count_sub('puzzles', 'facil'), 'medio': count_sub('puzzles', 'medio'), 'dificil': count_sub('puzzles', 'dificil'),
+        'curiosidades': count_sub('extras', 'curiosidades'), 'referencias': count_sub('extras', 'referencias'),
+    }
+
+    total_items = len(fragments_db)
+    unlocked_count = len([f for f in fragments_db if f['status'] == 'unlocked'])
+    progress_percent = int((unlocked_count / total_items) * 100) if total_items > 0 else 0
 
     context = {
-        'fragments': fragments_db,
-        'selected': selected_fragment,
-        'total': total,
-        'unlocked_count': unlocked,
-        'progress_percent': progress_percentage,
-        # Lógica circular para o botão "Próximo": se for o último (5), volta para o 1
-        'next_id': fragment_id + 1 if fragment_id < total else 1
+        'selected': selected_item,
+        'current_list_items': current_list_items,
+        'related_items': [f for f in fragments_db if f['id'] in selected_item.get('related_ids', [])],
+        'nav_links': nav_links,
+        'main_links': main_category_links,
+        'counts': counts,
+        'active_category': selected_item['category'],
+        'active_subcategory': selected_item['subcategory'],
+        'total_items': total_items,
+        'unlocked_count': unlocked_count,
+        'progress_percent': progress_percent
     }
 
     return render(request, 'gamepage/chama_espiralLore.html', context)
-
-
+   

@@ -1,0 +1,193 @@
+{% extends 'baseChama_espiral.html' %}
+{% load static %}
+
+{% block title %}Portal de Narrativa - {{ selected.title }}{% endblock %}
+
+{% block content %}
+<style>
+    /* Estilos Específicos do Portal */
+    body {
+        background-color: #111827; /* Fundo escuro base */
+        overflow-x: hidden;
+    }
+    
+    .lore-container {
+        min-height: 100vh;
+        background: radial-gradient(circle at top right, #1e3a8a 0%, #0f172a 60%, #000000 100%);
+    }
+
+    .glass-panel {
+        background: rgba(30, 41, 59, 0.7);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    /* Linhas do Mapa (Simulação visual) */
+    .map-connector {
+        position: absolute;
+        height: 2px;
+        background: rgba(59, 130, 246, 0.3);
+        transform-origin: left center;
+        z-index: 0;
+    }
+
+    /* Pontos do Mapa */
+    .map-node {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 10;
+    }
+    .map-node:hover {
+        transform: scale(1.1);
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
+    }
+    .map-node.active {
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
+        border-color: #60a5fa;
+    }
+
+    /* Animação de entrada */
+    .fade-in-up {
+        animation: fadeInUp 0.5s ease-out forwards;
+    }
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<div class="lore-container text-gray-100 font-body p-4 md:p-8">
+    
+    <header class="max-w-7xl mx-auto mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="flex items-center gap-4 w-full md:w-auto">
+            <a href="{% url 'chama_espiral' %}" class="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Voltar
+            </a>
+            
+            <div class="border-l border-gray-600 h-8 mx-2"></div>
+            <div>
+                <h1 class="font-tech text-2xl font-bold text-white">Portal de Narrativa</h1>
+                <p class="text-xs text-blue-300">Explore os mistérios da Chama Espiral</p>
+            </div>
+        </div>
+
+        <div class="w-full md:w-64">
+            
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 h-auto lg:h-[750px]">
+        
+        <div class="lg:col-span-5 glass-panel rounded-xl p-6 relative flex flex-col">
+            <div class="mb-4">
+                <h2 class="font-bold text-lg flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Mapa de Fragmentos
+                </h2>
+                <p class="text-xs text-gray-400">Clique nos pontos para explorar a narrativa</p>
+            </div>
+
+            <div class="flex-grow bg-gray-900/50 rounded-lg border border-gray-700/50 relative overflow-hidden" 
+                 style="background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 20px 20px;">
+                
+                <svg class="absolute inset-0 w-full h-full pointer-events-none opacity-30">
+                    <path d="M 20% 45% L 50% 30% L 70% 55% L 40% 70% L 60% 85%" stroke="#3b82f6" stroke-width="2" fill="none" />
+                </svg>
+
+                {% for frag in fragments %}
+                <a href="{% url 'lore_detail' frag.id %}" 
+                   class="map-node absolute w-12 h-12 rounded-full flex items-center justify-center border-2 cursor-pointer group
+                          {% if frag.is_active %} bg-blue-600 border-white text-white z-20 scale-110
+                          {% elif frag.status == 'unlocked' %} bg-blue-900/80 border-blue-500 text-blue-300
+                          {% else %} bg-gray-700 border-gray-500 text-gray-500 {% endif %}"
+                   style="top: {{ frag.pos_top }}%; left: {{ frag.pos_left }}%; transform: translate(-50%, -50%);"
+                   title="{{ frag.title }}">
+                    
+                    {% if frag.status == 'locked' %}
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                    {% else %}
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                        </svg>
+                    {% endif %}
+
+                    <div class="absolute top-14 left-1/2 -translate-x-1/2 whitespace-nowrap bg-blue-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-30">
+                        {{ frag.title }}
+                    </div>
+                </a>
+                {% endfor %}
+
+            </div>
+
+            <div class="mt-4 flex gap-4 text-xs text-gray-400">
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full bg-blue-500"></span> Desbloqueado
+                </div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-7 glass-panel rounded-xl p-8 flex flex-col fade-in-up border-t-4 border-t-blue-500 relative">
+            
+            {% if selected.status == 'locked' %}
+                <div class="flex-grow flex flex-col items-center justify-center text-center opacity-50">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mb-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    <h2 class="text-2xl font-bold font-tech mb-2">Fragmento Bloqueado</h2>
+                    <p>Continue sua jornada para desvendar este mistério.</p>
+                </div>
+            {% else %}
+                <div class="flex gap-3 mb-6">
+                    <span class="px-3 py-1 bg-gray-700 rounded text-xs text-gray-300 border border-gray-600 flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                        {{ selected.type }}
+                    </span>
+                    <span class="px-3 py-1 bg-blue-900/50 rounded text-xs text-blue-300 border border-blue-500/30 flex items-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                        Desbloqueado
+                    </span>
+                </div>
+
+                <h2 class="text-3xl md:text-4xl font-bold font-tech text-white mb-6">{{ selected.title }}</h2>
+
+                <div class="prose prose-invert prose-lg max-w-none text-gray-300 leading-relaxed font-body mb-8">
+                    <p>{{ selected.content }}</p>
+                </div>
+
+                <div class="bg-blue-900/20 border border-blue-500/30 rounded-lg p-6 flex gap-4 mb-8">
+                    <div class="flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-white mb-1">Reflexão Espiral</h4>
+                        <p class="text-sm text-blue-200">{{ selected.reflection }}</p>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="mt-auto pt-6 border-t border-gray-700 flex justify-between items-center">
+                <button class="px-4 py-2 border border-gray-600 rounded text-gray-400 text-sm hover:bg-gray-800 transition cursor-not-allowed opacity-50" title="Disponível apenas na versão completa">
+                    Explorar no Demo
+                </button>
+
+                <a href="{% url 'lore_detail' next_id %}" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded font-bold flex items-center gap-2 transition-transform hover:translate-x-1 shadow-lg shadow-blue-600/20">
+                    Próximo Fragmento
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                </a>
+            </div>
+
+        </div>
+    </main>
+</div>
+{% endblock %}

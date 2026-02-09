@@ -1,191 +1,340 @@
 {% extends 'baseChama_espiral.html' %}
 {% load static %}
 
-{% block title %}Portal de Narrativa - {{ selected.title }}{% endblock %}
+{% block title %}Zenith - {{ selected.title }}{% endblock %}
 
 {% block content %}
 <style>
-    /* Estilos Específicos do Portal */
-    body {
-        background-color: #111827; /* Fundo escuro base */
-        overflow-x: hidden;
+    /* --- CONFIGURAÇÕES VISUAIS --- */
+    :root {
+        --panel-bg: rgba(15, 23, 42, 0.6);
+        --border-color: rgba(59, 130, 246, 0.2);
+        --blue-accent: #2563eb;
     }
-    
-    .lore-container {
-        min-height: 100vh;
-        background: radial-gradient(circle at top right, #1e3a8a 0%, #0f172a 60%, #000000 100%);
+
+    /* BACKGROUND NOVO: Gradiente Radial Profundo */
+    .main-bg {
+        background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 40%, #020617 100%);
+        /* Começa com um azul ardósia no topo e escurece para quase preto no fundo */
     }
+
+    /* Scrollbar Fina */
+    .custom-scroll::-webkit-scrollbar { width: 4px; }
+    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #475569; }
 
     .glass-panel {
-        background: rgba(30, 41, 59, 0.7);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(59, 130, 246, 0.2);
+        background: var(--panel-bg);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--border-color);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    
+    /* Item ativo na lista do meio */
+    .list-item-active {
+        background: rgba(37, 99, 235, 0.15);
+        border: 1px solid rgba(59, 130, 246, 0.4);
+    }
+    
+    .dashboard-height {
+        height: calc(100vh - 80px);
     }
 
-    /* Linhas do Mapa (Simulação visual) */
-    .map-connector {
-        position: absolute;
-        height: 2px;
-        background: rgba(59, 130, 246, 0.3);
-        transform-origin: left center;
-        z-index: 0;
+    /* Submenu Items */
+    .submenu-item {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 0.5rem 1rem; font-size: 0.75rem; 
+        transition: all 0.2s; border-left: 2px solid transparent;
+        text-decoration: none;
+    }
+    .submenu-item:hover { color: white; background: rgba(31, 41, 55, 0.5); }
+    
+    .submenu-active {
+        color: #93c5fd; 
+        border-color: #3b82f6; 
+        background: rgba(59, 130, 246, 0.1);
+        font-weight: bold;
+    }
+    
+    /* Badges (Contadores 0/0) */
+    .badge {
+        background: rgba(31, 41, 55, 0.8);
+        padding: 0.125rem 0.375rem;
+        border-radius: 0.25rem;
+        font-size: 0.6rem;
+        color: #9ca3af;
+        border: 1px solid rgba(55, 65, 81, 0.5);
     }
 
-    /* Pontos do Mapa */
-    .map-node {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        z-index: 10;
-    }
-    .map-node:hover {
-        transform: scale(1.1);
-        box-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
-    }
-    .map-node.active {
-        box-shadow: 0 0 20px rgba(59, 130, 246, 0.8);
-        border-color: #60a5fa;
-    }
-
-    /* Animação de entrada */
-    .fade-in-up {
-        animation: fadeInUp 0.5s ease-out forwards;
-    }
-    @keyframes fadeInUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
+    .arrow-icon {
+        transition: transform 0.3s ease;
     }
 </style>
 
-<div class="lore-container text-gray-100 font-body p-4 md:p-8">
+<script>
+    function toggleCategory(event, submenuId, iconId) {
+        const submenu = document.getElementById(submenuId);
+        const icon = document.getElementById(iconId);
+        
+        if (!submenu.classList.contains('hidden')) {
+            event.preventDefault(); 
+            submenu.classList.add('hidden'); 
+            icon.classList.remove('rotate-180');
+            
+            const header = event.currentTarget;
+            header.classList.remove('bg-blue-600', 'text-white');
+            header.classList.add('text-gray-400', 'hover:bg-gray-800');
+        } 
+    }
+</script>
+
+<div class="main-bg min-h-screen text-gray-300 font-sans overflow-hidden flex flex-col">
     
-    <header class="max-w-7xl mx-auto mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
-        <div class="flex items-center gap-4 w-full md:w-auto">
-            <a href="{% url 'chama_espiral' %}" class="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                </svg>
+    <header class="h-16 border-b border-gray-800 bg-[#0f172a]/90 px-6 flex items-center justify-between flex-shrink-0 z-20">
+        <div class="flex items-center gap-6">
+            <a href="{% url 'chama_espiral' %}" class="flex items-center gap-2 text-gray-400 hover:text-white transition-colors text-sm font-medium group">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
                 Voltar
             </a>
-            
-            <div class="border-l border-gray-600 h-8 mx-2"></div>
             <div>
-                <h1 class="font-tech text-2xl font-bold text-white">Portal de Narrativa</h1>
-                <p class="text-xs text-blue-300">Explore os mistérios da Chama Espiral</p>
+                <h1 class="text-white font-bold text-lg tracking-wide uppercase font-tech">Biblioteca de Lore</h1>
+                <p class="text-[10px] text-blue-500 uppercase tracking-wider">Explore o universo Chama Espiral</p>
             </div>
         </div>
 
-        <div class="w-full md:w-64">
-            
-        </div>
+        
     </header>
 
-    <main class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 h-auto lg:h-[750px]">
-        
-        <div class="lg:col-span-5 glass-panel rounded-xl p-6 relative flex flex-col">
-            <div class="mb-4">
-                <h2 class="font-bold text-lg flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    Mapa de Fragmentos
-                </h2>
-                <p class="text-xs text-gray-400">Clique nos pontos para explorar a narrativa</p>
-            </div>
-
-            <div class="flex-grow bg-gray-900/50 rounded-lg border border-gray-700/50 relative overflow-hidden" 
-                 style="background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 20px 20px;">
-                
-                <svg class="absolute inset-0 w-full h-full pointer-events-none opacity-30">
-                    <path d="M 20% 45% L 50% 30% L 70% 55% L 40% 70% L 60% 85%" stroke="#3b82f6" stroke-width="2" fill="none" />
-                </svg>
-
-                {% for frag in fragments %}
-                <a href="{% url 'lore_detail' frag.id %}" 
-                   class="map-node absolute w-12 h-12 rounded-full flex items-center justify-center border-2 cursor-pointer group
-                          {% if frag.is_active %} bg-blue-600 border-white text-white z-20 scale-110
-                          {% elif frag.status == 'unlocked' %} bg-blue-900/80 border-blue-500 text-blue-300
-                          {% else %} bg-gray-700 border-gray-500 text-gray-500 {% endif %}"
-                   style="top: {{ frag.pos_top }}%; left: {{ frag.pos_left }}%; transform: translate(-50%, -50%);"
-                   title="{{ frag.title }}">
-                    
-                    {% if frag.status == 'locked' %}
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                        </svg>
-                    {% else %}
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                        </svg>
-                    {% endif %}
-
-                    <div class="absolute top-14 left-1/2 -translate-x-1/2 whitespace-nowrap bg-blue-600 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-30">
-                        {{ frag.title }}
-                    </div>
-                </a>
-                {% endfor %}
-
-            </div>
-
-            <div class="mt-4 flex gap-4 text-xs text-gray-400">
-                <div class="flex items-center gap-2">
-                    <span class="w-3 h-3 rounded-full bg-blue-500"></span> Desbloqueado
-                </div>
-            </div>
-        </div>
-
-        <div class="lg:col-span-7 glass-panel rounded-xl p-8 flex flex-col fade-in-up border-t-4 border-t-blue-500 relative">
+    <main class="flex-grow p-4 md:p-6 overflow-hidden">
+        <div class="grid grid-cols-12 gap-6 dashboard-height">
             
-            {% if selected.status == 'locked' %}
-                <div class="flex-grow flex flex-col items-center justify-center text-center opacity-50">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mb-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                    <h2 class="text-2xl font-bold font-tech mb-2">Fragmento Bloqueado</h2>
-                    <p>Continue sua jornada para desvendar este mistério.</p>
-                </div>
-            {% else %}
-                <div class="flex gap-3 mb-6">
-                    <span class="px-3 py-1 bg-gray-700 rounded text-xs text-gray-300 border border-gray-600 flex items-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                        {{ selected.type }}
-                    </span>
-                    <span class="px-3 py-1 bg-blue-900/50 rounded text-xs text-blue-300 border border-blue-500/30 flex items-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
-                        Desbloqueado
-                    </span>
+            <aside class="col-span-3 glass-panel rounded-lg flex flex-col overflow-hidden h-full">
+                <div class="p-4 border-b border-gray-700/50 flex items-center gap-2 bg-gray-900/30">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                    <span class="font-bold text-white text-sm">Categorias</span>
                 </div>
 
-                <h2 class="text-3xl md:text-4xl font-bold font-tech text-white mb-6">{{ selected.title }}</h2>
-
-                <div class="prose prose-invert prose-lg max-w-none text-gray-300 leading-relaxed font-body mb-8">
-                    <p>{{ selected.content }}</p>
-                </div>
-
-                <div class="bg-blue-900/20 border border-blue-500/30 rounded-lg p-6 flex gap-4 mb-8">
-                    <div class="flex-shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                        </svg>
+                <div class="overflow-y-auto p-2 space-y-1 custom-scroll">
+                    
+                    <div class="rounded overflow-hidden">
+                        <a href="{% url 'lore_detail' main_links.lore %}" 
+                           onclick="toggleCategory(event, 'submenu-lore', 'icon-lore')"
+                           class="w-full text-left px-3 py-2 text-sm font-medium flex justify-between items-center rounded transition-colors cursor-pointer select-none
+                                  {% if active_category == 'lore' %}bg-blue-600 text-white{% else %}text-gray-400 hover:bg-gray-800{% endif %}">
+                            <span class="flex items-center gap-2">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg> Lore
+                            </span>
+                            <svg id="icon-lore" class="h-3 w-3 arrow-icon {% if active_category == 'lore' %}rotate-180{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </a>
+                        <div id="submenu-lore" class="mt-1 space-y-0.5 bg-gray-900/40 rounded overflow-hidden border-l-2 border-gray-700/50 ml-1 {% if active_category != 'lore' %}hidden{% endif %}">
+                            <a href="{% url 'lore_detail' nav_links.lore_historia %}" class="submenu-item {% if active_subcategory == 'historia' %}submenu-active{% endif %}"><span>História</span><span class="badge">{{ counts.historia }}/{{ counts.historia }}</span></a>
+                            <a href="{% url 'lore_detail' nav_links.lore_eventos %}" class="submenu-item {% if active_subcategory == 'eventos' %}submenu-active{% endif %}"><span>Eventos</span><span class="badge">{{ counts.eventos }}/{{ counts.eventos }}</span></a>
+                            <a href="{% url 'lore_detail' nav_links.lore_cronologia %}" class="submenu-item {% if active_subcategory == 'cronologia' %}submenu-active{% endif %}"><span>Cronologia</span><span class="badge">{{ counts.cronologia }}/{{ counts.cronologia }}</span></a>
+                        </div>
                     </div>
+
+                    <div class="rounded overflow-hidden mt-1">
+                        <a href="{% url 'lore_detail' main_links.personagens %}" 
+                           onclick="toggleCategory(event, 'submenu-personagens', 'icon-personagens')"
+                           class="w-full text-left px-3 py-2 text-sm font-medium flex justify-between items-center rounded transition-colors cursor-pointer select-none
+                                  {% if active_category == 'personagens' %}bg-blue-600 text-white{% else %}text-gray-400 hover:bg-gray-800{% endif %}">
+                            <span class="flex items-center gap-2">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg> Personagens
+                            </span>
+                            <svg id="icon-personagens" class="h-3 w-3 arrow-icon {% if active_category == 'personagens' %}rotate-180{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </a>
+                        <div id="submenu-personagens" class="mt-1 space-y-0.5 bg-gray-900/40 rounded overflow-hidden border-l-2 border-gray-700/50 ml-1 {% if active_category != 'personagens' %}hidden{% endif %}">
+                            <a href="{% url 'lore_detail' nav_links.personagens_guardioes %}" class="submenu-item {% if active_subcategory == 'guardioes' %}submenu-active{% endif %}"><span>Guardiões</span><span class="badge">{{ counts.guardioes }}/{{ counts.guardioes }}</span></a>
+                            <a href="{% url 'lore_detail' nav_links.personagens_lideres %}" class="submenu-item {% if active_subcategory == 'lideres' %}submenu-active{% endif %}"><span>Líderes</span><span class="badge">{{ counts.lideres }}/{{ counts.lideres }}</span></a>
+                            <a href="{% url 'lore_detail' nav_links.personagens_entidades %}" class="submenu-item {% if active_subcategory == 'entidades' %}submenu-active{% endif %}"><span>Entidades</span><span class="badge">{{ counts.entidades }}/{{ counts.entidades }}</span></a>
+                        </div>
+                    </div>
+
+                    <div class="rounded overflow-hidden mt-1">
+                        <a href="{% url 'lore_detail' main_links.locais %}" 
+                           onclick="toggleCategory(event, 'submenu-locais', 'icon-locais')"
+                           class="w-full text-left px-3 py-2 text-sm font-medium flex justify-between items-center rounded transition-colors cursor-pointer select-none
+                                  {% if active_category == 'locais' %}bg-blue-600 text-white{% else %}text-gray-400 hover:bg-gray-800{% endif %}">
+                            <span class="flex items-center gap-2">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg> Locais
+                            </span>
+                            <svg id="icon-locais" class="h-3 w-3 arrow-icon {% if active_category == 'locais' %}rotate-180{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </a>
+                        <div id="submenu-locais" class="mt-1 space-y-0.5 bg-gray-900/40 rounded overflow-hidden border-l-2 border-gray-700/50 ml-1 {% if active_category != 'locais' %}hidden{% endif %}">
+                            <a href="{% url 'lore_detail' nav_links.locais_templos %}" class="submenu-item {% if active_subcategory == 'templos' %}submenu-active{% endif %}"><span>Templos</span><span class="badge">{{ counts.templos }}/{{ counts.templos }}</span></a>
+                            <a href="{% url 'lore_detail' nav_links.locais_ruinas %}" class="submenu-item {% if active_subcategory == 'ruinas' %}submenu-active{% endif %}"><span>Ruínas</span><span class="badge">{{ counts.ruinas }}/{{ counts.ruinas }}</span></a>
+                            <a href="{% url 'lore_detail' nav_links.locais_santuarios %}" class="submenu-item {% if active_subcategory == 'santuarios' %}submenu-active{% endif %}"><span>Santuários</span><span class="badge">{{ counts.santuarios }}/{{ counts.santuarios }}</span></a>
+                        </div>
+                    </div>
+
+                    <div class="rounded overflow-hidden mt-1">
+                        <a href="{% url 'lore_detail' main_links.artefatos %}" 
+                           onclick="toggleCategory(event, 'submenu-artefatos', 'icon-artefatos')"
+                           class="w-full text-left px-3 py-2 text-sm font-medium flex justify-between items-center rounded transition-colors cursor-pointer select-none
+                                  {% if active_category == 'artefatos' %}bg-blue-600 text-white{% else %}text-gray-400 hover:bg-gray-800{% endif %}">
+                            <span class="flex items-center gap-2">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg> Artefatos
+                            </span>
+                            <svg id="icon-artefatos" class="h-3 w-3 arrow-icon {% if active_category == 'artefatos' %}rotate-180{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </a>
+                        <div id="submenu-artefatos" class="mt-1 space-y-0.5 bg-gray-900/40 rounded overflow-hidden border-l-2 border-gray-700/50 ml-1 {% if active_category != 'artefatos' %}hidden{% endif %}">
+                            <a href="{% url 'lore_detail' nav_links.artefatos_reliquias %}" class="submenu-item {% if active_subcategory == 'reliquias' %}submenu-active{% endif %}"><span>Relíquias</span><span class="badge">{{ counts.reliquias }}/{{ counts.reliquias }}</span></a>
+                            <a href="{% url 'lore_detail' nav_links.artefatos_fragmentos %}" class="submenu-item {% if active_subcategory == 'fragmentos' %}submenu-active{% endif %}"><span>Fragmentos</span><span class="badge">{{ counts.fragmentos }}/{{ counts.fragmentos }}</span></a>
+                        </div>
+                    </div>
+
+                    <div class="rounded overflow-hidden mt-1">
+                        <a href="{% url 'lore_detail' main_links.galeria %}" 
+                           onclick="toggleCategory(event, 'submenu-galeria', 'icon-galeria')"
+                           class="w-full text-left px-3 py-2 text-sm font-medium flex justify-between items-center rounded transition-colors cursor-pointer select-none
+                                  {% if active_category == 'galeria' %}bg-blue-600 text-white{% else %}text-gray-400 hover:bg-gray-800{% endif %}">
+                            <span class="flex items-center gap-2">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg> Galeria
+                            </span>
+                            <svg id="icon-galeria" class="h-3 w-3 arrow-icon {% if active_category == 'galeria' %}rotate-180{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </a>
+                        <div id="submenu-galeria" class="mt-1 space-y-0.5 bg-gray-900/40 rounded overflow-hidden border-l-2 border-gray-700/50 ml-1 {% if active_category != 'galeria' %}hidden{% endif %}">
+                            <a href="{% url 'lore_detail' nav_links.galeria_concept %}" class="submenu-item {% if active_subcategory == 'concept_art' %}submenu-active{% endif %}"><span>Concept Art</span><span class="badge">{{ counts.concept }}/{{ counts.concept }}</span></a>
+                            <a href="{% url 'lore_detail' nav_links.galeria_ilustracoes %}" class="submenu-item {% if active_subcategory == 'ilustracoes' %}submenu-active{% endif %}"><span>Ilustrações</span><span class="badge">{{ counts.ilustracoes }}/{{ counts.ilustracoes }}</span></a>
+                        </div>
+                    </div>
+
+                    <div class="rounded overflow-hidden mt-1">
+                        <a href="{% url 'lore_detail' main_links.puzzles %}" 
+                           onclick="toggleCategory(event, 'submenu-puzzles', 'icon-puzzles')"
+                           class="w-full text-left px-3 py-2 text-sm font-medium flex justify-between items-center rounded transition-colors cursor-pointer select-none
+                                  {% if active_category == 'puzzles' %}bg-blue-600 text-white{% else %}text-gray-400 hover:bg-gray-800{% endif %}">
+                            <span class="flex items-center gap-2">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" /></svg> Puzzles
+                            </span>
+                            <svg id="icon-puzzles" class="h-3 w-3 arrow-icon {% if active_category == 'puzzles' %}rotate-180{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </a>
+                        <div id="submenu-puzzles" class="mt-1 space-y-0.5 bg-gray-900/40 rounded overflow-hidden border-l-2 border-gray-700/50 ml-1 {% if active_category != 'puzzles' %}hidden{% endif %}">
+                            <a href="{% url 'lore_detail' nav_links.puzzles_facil %}" class="submenu-item {% if active_subcategory == 'facil' %}submenu-active{% endif %}"><span>Fácil</span><span class="badge">{{ counts.facil }}/{{ counts.facil }}</span></a>
+                            <a href="{% url 'lore_detail' nav_links.puzzles_medio %}" class="submenu-item {% if active_subcategory == 'medio' %}submenu-active{% endif %}"><span>Médio</span><span class="badge">{{ counts.medio }}/{{ counts.medio }}</span></a>
+                            <a href="{% url 'lore_detail' nav_links.puzzles_dificil %}" class="submenu-item {% if active_subcategory == 'dificil' %}submenu-active{% endif %}"><span>Difícil</span><span class="badge">{{ counts.dificil }}/{{ counts.dificil }}</span></a>
+                        </div>
+                    </div>
+
+                     <div class="rounded overflow-hidden mt-1">
+                        <a href="{% url 'lore_detail' main_links.extras %}" 
+                           onclick="toggleCategory(event, 'submenu-extras', 'icon-extras')"
+                           class="w-full text-left px-3 py-2 text-sm font-medium flex justify-between items-center rounded transition-colors cursor-pointer select-none
+                                  {% if active_category == 'extras' %}bg-blue-600 text-white{% else %}text-gray-400 hover:bg-gray-800{% endif %}">
+                            <span class="flex items-center gap-2">
+                                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg> Extras
+                            </span>
+                            <svg id="icon-extras" class="h-3 w-3 arrow-icon {% if active_category == 'extras' %}rotate-180{% endif %}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </a>
+                        <div id="submenu-extras" class="mt-1 space-y-0.5 bg-gray-900/40 rounded overflow-hidden border-l-2 border-gray-700/50 ml-1 {% if active_category != 'extras' %}hidden{% endif %}">
+                            <a href="{% url 'lore_detail' nav_links.extras_curiosidades %}" class="submenu-item {% if active_subcategory == 'curiosidades' %}submenu-active{% endif %}"><span>Curiosidades</span><span class="badge">{{ counts.curiosidades }}/{{ counts.curiosidades }}</span></a>
+                            <a href="{% url 'lore_detail' nav_links.extras_referencias %}" class="submenu-item {% if active_subcategory == 'referencias' %}submenu-active{% endif %}"><span>Referências</span><span class="badge">{{ counts.referencias }}/{{ counts.referencias }}</span></a>
+                        </div>
+                    </div>
+
+                </div>
+            </aside>
+
+            <section class="col-span-4 glass-panel rounded-lg flex flex-col h-full relative">
+                <div class="p-4 border-b border-gray-700/50 bg-gray-900/30">
+                    <h2 class="font-bold text-white flex items-center gap-2 text-sm uppercase tracking-wide">
+                         {{ active_category }} - {{ active_subcategory }}
+                    </h2>
+                    <p class="text-[10px] text-gray-500 mt-1">{{ current_list_items|length }} itens disponíveis</p>
+                </div>
+
+                <div class="flex-grow overflow-y-auto p-2 custom-scroll">
+                    {% if current_list_items %}
+                        {% for item in current_list_items %}
+                        <a href="{% url 'lore_detail' item.id %}" class="block mb-2 p-3 rounded transition-all hover:bg-gray-800/50 {% if item.id == selected.id %}list-item-active{% else %}border border-transparent{% endif %}">
+                            <div class="flex justify-between items-start">
+                                <span class="text-sm font-bold {% if item.id == selected.id %}text-white{% else %}text-gray-400{% endif %}">
+                                    {{ item.title }}
+                                </span>
+                                {% if item.status == 'locked' %}
+                                    <svg class="w-3 h-3 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                {% endif %}
+                            </div>
+                            <div class="text-[10px] text-gray-600 mt-1 uppercase tracking-wider">{{ item.type }}</div>
+                        </a>
+                        {% endfor %}
+                    {% else %}
+                        <div class="flex flex-col items-center justify-center h-64 text-gray-600 opacity-40 mt-10">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 14l9-5-9-5-9 5 9 5z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                            </svg>
+                            <p class="text-xs font-medium">Nenhum conteúdo disponível nesta categoria</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <article class="col-span-5 glass-panel rounded-lg flex flex-col h-full border-t-4 border-t-blue-500 overflow-hidden relative">
+                <div class="p-8 overflow-y-auto custom-scroll flex-grow">
+                    <div class="flex justify-between items-center mb-6">
+                        <span class="px-2 py-1 bg-gray-800 border border-gray-700 text-[10px] text-gray-400 rounded uppercase tracking-wider font-bold">
+                            {{ selected.type }}
+                        </span>
+                        {% if selected.status == 'unlocked' %}
+                        <span class="flex items-center gap-1 px-2 py-1 bg-[#166534]/20 border border-green-500/30 text-green-400 text-[10px] rounded uppercase font-bold">
+                            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                            Desbloqueado
+                        </span>
+                        {% else %}
+                        <span class="flex items-center gap-1 px-2 py-1 bg-red-900/20 border border-red-500/30 text-red-400 text-[10px] rounded uppercase font-bold">
+                            Bloqueado
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <h1 class="text-3xl font-bold text-white mb-6 font-tech leading-tight tracking-wide">{{ selected.title }}</h1>
+
+                    <div class="prose prose-sm prose-invert text-gray-300 font-light leading-7 mb-8">
+                        {% if selected.status == 'unlocked' %}
+                            {{ selected.content|linebreaks }}
+                        {% else %}
+                            <p class="italic opacity-50 text-center py-10">
+                                Este fragmento de conhecimento permanece oculto nas sombras.<br>Explore mais o mundo para revelá-lo.
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <hr class="border-gray-700/50 mb-6">
+
+                    {% if related_items and selected.status == 'unlocked' %}
                     <div>
-                        <h4 class="font-bold text-white mb-1">Reflexão Espiral</h4>
-                        <p class="text-sm text-blue-200">{{ selected.reflection }}</p>
+                        <h3 class="text-xs font-bold text-white uppercase flex items-center gap-2 mb-4">
+                            <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                            Itens Relacionados
+                        </h3>
+
+                        <div class="space-y-3">
+                            {% for rel in related_items %}
+                            <a href="{% url 'lore_detail' rel.id %}" class="group block p-3 rounded bg-[#1e293b]/50 border border-blue-900/30 hover:border-blue-500/50 hover:bg-blue-900/20 transition-all cursor-pointer">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-6 h-6 rounded-full bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500 group-hover:text-white transition-all text-blue-500">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-bold text-gray-200 group-hover:text-white transition-colors">{{ rel.title }}</h4>
+                                        <p class="text-[10px] text-gray-500 group-hover:text-blue-300">{{ rel.type }}</p>
+                                    </div>
+                                </div>
+                            </a>
+                            {% endfor %}
+                        </div>
                     </div>
+                    {% endif %}
                 </div>
-            {% endif %}
 
-            <div class="mt-auto pt-6 border-t border-gray-700 flex justify-between items-center">
-                <button class="px-4 py-2 border border-gray-600 rounded text-gray-400 text-sm hover:bg-gray-800 transition cursor-not-allowed opacity-50" title="Disponível apenas na versão completa">
-                    Explorar no Demo
-                </button>
-
-                <a href="{% url 'lore_detail' next_id %}" class="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded font-bold flex items-center gap-2 transition-transform hover:translate-x-1 shadow-lg shadow-blue-600/20">
-                    Próximo Fragmento
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
-                </a>
-            </div>
+                <div class="p-6 mt-auto border-t border-gray-700/50 bg-gray-900/50 backdrop-blur">
+                    <button class="w-full py-3 border border-blue-500/30 text-blue-400 text-xs font-bold uppercase tracking-widest rounded hover:bg-blue-600 hover:text-white transition-all shadow-[0_0_15px_rgba(59,130,246,0.1)] hover:shadow-[0_0_20px_rgba(59,130,246,0.4)]">
+                        Explorar no Demo
+                    </button>
+                </div>
+            </article>
 
         </div>
     </main>
